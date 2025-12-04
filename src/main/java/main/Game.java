@@ -132,7 +132,7 @@ public class Game implements Runnable, PlayerEventListener {
     public void updateGameState() {
         model.updatePlaying();
 
-        //TODO Abstract so that it listens for "PlayerDiedEvent"
+        //Abstract so that it listens for "PlayerD"
         if (model.checkIsDead()) {
             audioController.playDead();
             levelManager.getCurrentLvl().triggerSpawnPlatform();
@@ -142,7 +142,7 @@ public class Game implements Runnable, PlayerEventListener {
             levelManager.getCurrentLvl().resetPlatforms();
         }
 
-        //TODO Abstract so that it listens for "LvlCompletedEvent"
+        //Abstract so that it listens for "LvlCompletedEvent"
         if (model.checkIsEndOfLevel()) {
             levelCompletedScoringUpdate();
             audioController.playNextLevel();
