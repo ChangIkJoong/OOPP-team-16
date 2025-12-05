@@ -11,9 +11,9 @@
 ## Developers
 - `Rayan Ahmad`    : `RayanAhmad123`
 - `Philip Hasson`  : `ChangIkJoong`
-- `Nadir Morabeth` :  ` `
-- `Oscar Jöjk`     : ` `
-- `Janna`          : ` `
+- `Nadir Morabeth` : `nadirmorebytes`
+- `Oscar Bergdahl` : `jojk1`
+- `Jannah Francine Rosales Beato` : `wthjaaa`
 
 ---
 ## 1. Architectural Overview
@@ -43,12 +43,13 @@ patterns. The **MVC** pattern in our architecture consiting of:
 
 ---
 
-## 2. Core Class Diagram (Overview) //TODO INSERT UMLS
+## 2. Core Class Diagram (Overview)
 
 Here are a few UML-style class diagrams for the core architecture. They are not complete
 and have been abstracted to easier understand the key responsibilities and relations in our application software.
 
 
+![UML (1).svg](UML%20%281%29.svg)
 
 ---
 
@@ -93,7 +94,7 @@ is however work-in-progress.
     - Stores all of the tile data arrays for ground, obstacles and objects.
     - Manages triggers, moving platforms, spikes, and death sprites.
 
-Together these forms the representation of the game world and it's rules.
+Together these forms the model itself of the game world along with it's rules.
 
 ### 3.2 View Component
 
@@ -161,3 +162,5 @@ model or controller and draw this accordingly.
       etc.) via the relevant state, part of this implementation was due to the importance of the haptic
   feedback from our user stories.
 
+And to add some more things,
+# OBSERVER PATTERN IS ABSOLUTELY NOT DONE, AND MOST OF THE ABSTRACTION IS 100% WORK IN PROGRESS.
