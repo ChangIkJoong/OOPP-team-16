@@ -1,10 +1,11 @@
 package main.states;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import main.Game;
@@ -20,6 +21,17 @@ public class MainMenu {
     private boolean editingName = false;
     private StringBuilder nameBuffer = new StringBuilder();
 
+    // Background image
+    private BufferedImage backgroundImage;
+
+    // Button images and states
+    private ArrayList<ButtonState> buttonStates = new ArrayList<>();
+    private ArrayList<BufferedImage[]> buttonImages = new ArrayList<>(); // [normal, hover, click] for each button
+
+    private enum ButtonState {
+        NORMAL, HOVER, CLICK
+    }
+
     public MainMenu(Game game) {
         this.game = game;
 
@@ -29,13 +41,80 @@ public class MainMenu {
         options.add("LEADERBOARDS"); // index 3
         options.add("QUIT"); // index 4
 
-        int buttonWidth = 300;
-        int buttonHeight = 50;
+        int buttonWidth = 350;  // Adjust this value for different button width
+        int buttonHeight = 80;  // Adjust this value for different button height
         int startextNumber = (Game.GAME_WIDTH - buttonWidth) / 2;
-        int startY = Game.GAME_HEIGHT / 2 - (options.size() * (buttonHeight + 10)) / 2;
+        int startY = (Game.GAME_HEIGHT / 2 - (options.size() * (buttonHeight + 10)) / 2) + 50;
         for (int i = 0; i < options.size(); i++) {
             bounds.add(new Rectangle(startextNumber, startY + i * (buttonHeight + 10), buttonWidth, buttonHeight));
         }
+
+        loadButtonImages();
+        loadBackgroundImage();
+        initializeButtonStates();
+    }
+
+    private void loadButtonImages() {
+        // Load images for each button [normal, hover, click]
+        buttonImages.add(new BufferedImage[]{
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.PLAY_BUTTON_NORMAL),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.PLAY_BUTTON_HOVER),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.PLAY_BUTTON_CLICK)
+        });
+        buttonImages.add(new BufferedImage[]{
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.CHANGE_PLAYER_BUTTON_NORMAL),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.CHANGE_PLAYER_BUTTON_HOVER),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.CHANGE_PLAYER_BUTTON_CLICK)
+        });
+        buttonImages.add(new BufferedImage[]{
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.SELECT_LEVEL_BUTTON_NORMAL),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.SELECT_LEVEL_BUTTON_HOVER),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.SELECT_LEVEL_BUTTON_CLICK)
+        });
+        buttonImages.add(new BufferedImage[]{
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.LEADERBOARDS_BUTTON_NORMAL),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.LEADERBOARDS_BUTTON_HOVER),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.LEADERBOARDS_BUTTON_CLICK)
+        });
+        buttonImages.add(new BufferedImage[]{
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.QUIT_BUTTON_NORMAL),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.QUIT_BUTTON_HOVER),
+            utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.QUIT_BUTTON_CLICK)
+        });
+    }
+
+    private void loadBackgroundImage() {
+        backgroundImage = utilz.LoadSave.getSpriteAtlas(utilz.LoadSave.MENU_BACKGROUND);
+    }
+
+    private void initializeButtonStates() {
+        for (int i = 0; i < options.size(); i++) {
+            buttonStates.add(ButtonState.NORMAL);
+        }
+    }
+
+    private BufferedImage getButtonImage(int buttonIndex) {
+        if (buttonIndex < 0 || buttonIndex >= buttonImages.size()) {
+            return null;
+        }
+
+        BufferedImage[] images = buttonImages.get(buttonIndex);
+        int stateIndex;
+
+        switch (buttonStates.get(buttonIndex)) {
+        case CLICK:
+            stateIndex = 2; // click image
+            break;
+        case HOVER:
+            stateIndex = 1; // hover image
+            break;
+        case NORMAL:
+        default:
+            stateIndex = 0; // normal image
+            break;
+        }
+
+        return images[stateIndex];
     }
 
     public void update() {
@@ -44,37 +123,46 @@ public class MainMenu {
 
     public void draw(Graphics g) {
         // background
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+        } else {
+            // Fallback if image not loaded
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+        }
 
         // title
         g.setFont(titleFont);
         g.setColor(Color.WHITE);
-        String title = "RUST RUNNER";
-        FontMetrics fontmetrics = g.getFontMetrics();
-        int textNumber = (Game.GAME_WIDTH - fontmetrics.stringWidth(title)) / 2;
-        g.drawString(title, textNumber, 150);
 
         // current player name
-        g.setFont(new Font("Arial", Font.PLAIN, 20));
+        g.setFont(new Font("Arial", Font.BOLD, 20));
         String nameText = "Player: " + game.getPlayerName();
         g.drawString(nameText, 20, 40);
 
         // the several options displayed:
-        g.setFont(optionsFont);
-        FontMetrics ofm = g.getFontMetrics();
         for (int i = 0; i < options.size(); i++) {
             Rectangle rectangle = bounds.get(i);
-            if (i == selected) {
-                g.setColor(Color.LIGHT_GRAY);
+            BufferedImage buttonImage = getButtonImage(i);
+            if (buttonImage != null) {
+                g.drawImage(buttonImage, rectangle.x, rectangle.y, rectangle.width, rectangle.height, null);
             } else {
-                g.setColor(Color.DARK_GRAY);
+                // Fallback if image not loaded
+                g.setFont(optionsFont);
+                FontMetrics ofm = g.getFontMetrics();
+                if (buttonStates.get(i) == ButtonState.CLICK) {
+                    g.setColor(Color.GRAY);
+                } else if (buttonStates.get(i) == ButtonState.HOVER) {
+                    g.setColor(Color.LIGHT_GRAY);
+                } else {
+                    g.setColor(Color.DARK_GRAY);
+                }
+                g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+                g.setColor(Color.WHITE);
+                int sx = rectangle.x + (rectangle.width - ofm.stringWidth(options.get(i))) / 2;
+                int sy = rectangle.y + (rectangle.height + ofm.getAscent()) / 2 - 4;
+                g.drawString(options.get(i), sx, sy);
             }
-            g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-            g.setColor(Color.WHITE);
-            int sx = rectangle.x + (rectangle.width - ofm.stringWidth(options.get(i))) / 2;
-            int sy = rectangle.y + (rectangle.height + ofm.getAscent()) / 2 - 4;
-            g.drawString(options.get(i), sx, sy);
         }
 
         if (editingName) {
@@ -100,7 +188,11 @@ public class MainMenu {
         for (int i = 0; i < bounds.size(); i++) {
             if (bounds.get(i).contains(x, y)) {
                 selected = i;
-                break;
+                if (buttonStates.get(i) != ButtonState.CLICK) {
+                    buttonStates.set(i, ButtonState.HOVER);
+                }
+            } else {
+                buttonStates.set(i, ButtonState.NORMAL);
             }
         }
     }
@@ -111,12 +203,23 @@ public class MainMenu {
         }
         for (int i = 0; i < bounds.size(); i++) {
             if (bounds.get(i).contains(x, y)) {
-                handleSelection(i);
+                buttonStates.set(i, ButtonState.CLICK);
                 return;
             }
         }
     }
 
+    public void mouseReleased(int x, int y) {
+        if (editingName) {
+            return;
+        }
+        for (int i = 0; i < bounds.size(); i++) {
+            if (bounds.get(i).contains(x, y) && buttonStates.get(i) == ButtonState.CLICK) {
+                handleSelection(i);
+            }
+            buttonStates.set(i, ButtonState.NORMAL);
+        }
+    }
 
     private void handleSelection(int choice) {
         switch (choice) {

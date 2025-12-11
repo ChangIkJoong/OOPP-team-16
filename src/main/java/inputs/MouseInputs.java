@@ -58,7 +58,16 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent arg0) {
+    public void mouseReleased(MouseEvent e) {
+        if (panel == null) {
+            return;
+        }
+        Game game = panel.getGame();
+        if (game.getGameState() == Game.GameState.MENU) {
+            game.mainMenu.mouseReleased(e.getX(), e.getY());
+        } else if (game.getGameState() == Game.GameState.LEVEL_SELECT) {
+            game.levelSelect.mouseReleased(e.getX(), e.getY());
+        }
     }
 
 }

@@ -30,11 +30,24 @@ public class LevelSelect {
     private Font titleFont = new Font("Arial", Font.BOLD, 48);
     private Font levelFont = new Font("Arial", Font.BOLD, 24);
 
+    // Back button images and state
+    private BufferedImage backButtonNormal;
+    private BufferedImage backButtonHover;
+    private BufferedImage backButtonClick;
+    private ButtonState backButtonState = ButtonState.NORMAL;
+    private Rectangle backButtonBounds;
+
+    private enum ButtonState {
+        NORMAL, HOVER, CLICK
+    }
+
     public LevelSelect(Game game, LevelManager levelManager) {
         this.game = game;
         this.levelManager = levelManager;
         loadLevelPreviews();
+        loadButtonImages();
         calculateLevelBounds();
+        calculateButtonBounds();
     }
     
     private void loadLevelPreviews() {
@@ -44,9 +57,36 @@ public class LevelSelect {
         levelPreviews.add(LoadSave.getSpriteAtlas(LoadSave.LEVEL_THREE_DATA));
         levelPreviews.add(LoadSave.getSpriteAtlas(LoadSave.LEVEL_FOUR_DATA));
         levelPreviews.add(LoadSave.getSpriteAtlas(LoadSave.LEVEL_FIVE_DATA));
+        levelPreviews.add(LoadSave.getSpriteAtlas(LoadSave.LEVEL_SIX_DATA));
+        levelPreviews.add(LoadSave.getSpriteAtlas(LoadSave.LEVEL_SEVEN_DATA));
         
         // Load lock image
         lockImage = LoadSave.getSpriteAtlas(LoadSave.LOCK);
+    }
+
+    private void loadButtonImages() {
+        backButtonNormal = LoadSave.getSpriteAtlas(LoadSave.BACK_BUTTON_NORMAL);
+        backButtonHover = LoadSave.getSpriteAtlas(LoadSave.BACK_BUTTON_HOVER);
+        backButtonClick = LoadSave.getSpriteAtlas(LoadSave.BACK_BUTTON_CLICK);
+    }
+
+    private void calculateButtonBounds() {
+        // Set button bounds - adjust these values based on your button image sizes
+        int buttonWidth = 120;  // Adjust this value for different back button width
+        int buttonHeight = 50;  // Adjust this value for different back button height
+        backButtonBounds = new Rectangle(20, 20, buttonWidth, buttonHeight);
+    }
+
+    private BufferedImage getButtonImage() {
+        switch (backButtonState) {
+        case CLICK:
+            return backButtonClick != null ? backButtonClick : backButtonNormal;
+        case HOVER:
+            return backButtonHover != null ? backButtonHover : backButtonNormal;
+        case NORMAL:
+        default:
+            return backButtonNormal;
+        }
     }
     
     private void calculateLevelBounds() {
@@ -130,15 +170,22 @@ public class LevelSelect {
         }
         
         // Back button
-        g.setColor(Color.DARK_GRAY);
-        Rectangle backButton = new Rectangle(20, 20, 100, 40);
-        g.fillRect(backButton.x, backButton.y, backButton.width, backButton.height);
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.PLAIN, 18));
-        FontMetrics backFontMetrics = g.getFontMetrics();
-        int backTextX = backButton.x + (backButton.width - backFontMetrics.stringWidth("Back")) / 2;
-        int backTextY = backButton.y + (backButton.height + backFontMetrics.getAscent()) / 2 - 4;
-        g.drawString("Back", backTextX, backTextY);
+        BufferedImage buttonImage = getButtonImage();
+        if (buttonImage != null) {
+            g.drawImage(buttonImage, backButtonBounds.x, backButtonBounds.y,
+                       backButtonBounds.width, backButtonBounds.height, null);
+        } else {
+            // Fallback if image not loaded
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(backButtonBounds.x, backButtonBounds.y,
+                      backButtonBounds.width, backButtonBounds.height);
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.PLAIN, 18));
+            FontMetrics backFontMetrics = g.getFontMetrics();
+            int backTextX = backButtonBounds.x + (backButtonBounds.width - backFontMetrics.stringWidth("Back")) / 2;
+            int backTextY = backButtonBounds.y + (backButtonBounds.height + backFontMetrics.getAscent()) / 2 - 4;
+            g.drawString("Back", backTextX, backTextY);
+        }
     }
     
     public void mouseMoved(int x, int y) {
@@ -149,16 +196,24 @@ public class LevelSelect {
                 break;
             }
         }
+
+        // Update back button state
+        if (backButtonBounds.contains(x, y)) {
+            if (backButtonState != ButtonState.CLICK) {
+                backButtonState = ButtonState.HOVER;
+            }
+        } else {
+            backButtonState = ButtonState.NORMAL;
+        }
     }
     
     public void mousePressed(int x, int y) {
         // Check back button
-        Rectangle backButton = new Rectangle(20, 20, 100, 40);
-        if (backButton.contains(x, y)) {
-            game.setGameState(Game.GameState.MENU);
+        if (backButtonBounds.contains(x, y)) {
+            backButtonState = ButtonState.CLICK;
             return;
         }
-        
+
         // Check level selection
         for (int i = 0; i < levelBounds.size(); i++) {
             if (levelBounds.get(i).contains(x, y)) {
@@ -167,7 +222,19 @@ public class LevelSelect {
             }
         }
     }
-    
+
+    public void mouseReleased(int x, int y) {
+        // Check back button release
+        if (backButtonBounds.contains(x, y) && backButtonState == ButtonState.CLICK) {
+            game.setGameState(Game.GameState.MENU);
+            backButtonState = ButtonState.NORMAL;
+            return;
+        }
+
+        // Reset button state if released outside
+        backButtonState = ButtonState.NORMAL;
+    }
+
     private void handleLevelSelection(int levelIndex) {
         // Only allow selecting unlocked levels
         if (!levelManager.isLevelUnlocked(levelIndex)) {

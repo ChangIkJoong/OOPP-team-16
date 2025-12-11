@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
@@ -28,6 +29,35 @@ public class LoadSave {
     public static final String TRANSITION_IMG = "Transition.png";
     public static final String SPAWN_TUBE = "SpawnTube.png";
     public static final String LOCK = "Lock.png";
+
+    // UI Backgrounds
+    public static final String MENU_BACKGROUND = "MenuBackground.png";
+
+    // UI Buttons
+    public static final String BACK_BUTTON_NORMAL = "BackButton.png";
+    public static final String BACK_BUTTON_HOVER = "BackButtonHover.png";
+    public static final String BACK_BUTTON_CLICK = "BackButtonClick.png";
+
+    // Main Menu Buttons
+    public static final String PLAY_BUTTON_NORMAL = "PlayButton.png";
+    public static final String PLAY_BUTTON_HOVER = "PlayButtonHover.png";
+    public static final String PLAY_BUTTON_CLICK = "PlayButtonClick.png";
+
+    public static final String CHANGE_PLAYER_BUTTON_NORMAL = "ChangePlayerButton.png";
+    public static final String CHANGE_PLAYER_BUTTON_HOVER = "ChangePlayerButtonHover.png";
+    public static final String CHANGE_PLAYER_BUTTON_CLICK = "ChangePlayerButtonClick.png";
+
+    public static final String SELECT_LEVEL_BUTTON_NORMAL = "SelectLevelButton.png";
+    public static final String SELECT_LEVEL_BUTTON_HOVER = "SelectLevelButtonHover.png";
+    public static final String SELECT_LEVEL_BUTTON_CLICK = "SelectLevelButtonClick.png";
+
+    public static final String LEADERBOARDS_BUTTON_NORMAL = "LeaderboardsButton.png";
+    public static final String LEADERBOARDS_BUTTON_HOVER = "LeaderboardsButtonHover.png";
+    public static final String LEADERBOARDS_BUTTON_CLICK = "LeaderboardsButtonClick.png";
+
+    public static final String QUIT_BUTTON_NORMAL = "QuitButton.png";
+    public static final String QUIT_BUTTON_HOVER = "QuitButtonHover.png";
+    public static final String QUIT_BUTTON_CLICK = "QuitButtonClick.png";
 
     // LEVEL1
     public static final String LEVEL_ONE_DATA = "Level1.png";
@@ -154,11 +184,11 @@ public class LoadSave {
         return path.resolve(LEADERBOARD_FILE_NAME);
     }
 
-    public static void appendToScoreFile(String playerName, int levelIndex, double time, int deaths) {
+    public static void appendToScoreFile(String playerName, int levelIndex, double timeSeconds, int deaths) {
         Path path = getLeaderboardPath();
         int humanLevel = levelIndex + 1;
 
-        String line = playerName + ";" + humanLevel + ";" + deaths + ";" + String.format("%.4f", time);
+        String line = playerName + ";" + humanLevel + ";" + deaths + ";" + String.format(Locale.US, "%.2f", timeSeconds);
 
         try (BufferedWriter writer = Files.newBufferedWriter(
                 path,

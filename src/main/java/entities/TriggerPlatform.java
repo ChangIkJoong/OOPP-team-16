@@ -26,6 +26,10 @@ public class TriggerPlatform extends Entity {
     private float spriteOffsetX;
     private float spriteOffsetY; // Offset to center sprite in hitbox
     private boolean solid = false; // If true, player can stand on this platform
+    private boolean loop = false; // If true, platform continuously moves back and forth
+
+    // Cached sprite hitbox object to avoid creating garbage
+    private final java.awt.geom.Rectangle2D.Float cachedSpriteHitbox = new java.awt.geom.Rectangle2D.Float();
 
     // For waiting at target before returning
     private boolean waitingAtTarget = false;
@@ -83,7 +87,16 @@ public class TriggerPlatform extends Entity {
         tileSprites.add(tileSprite);
     }
 
+    public void setLoop(boolean loop) {
+        this.loop = loop;
+    }
+
     public void update() {
+        // If looping, start immediately without trigger
+        if (loop && !triggered) {
+            triggered = true;
+        }
+
         if (!triggered || reachedTarget) {
             return;
         }
@@ -92,7 +105,7 @@ public class TriggerPlatform extends Entity {
         if (waitingAtTarget) {
             if (System.currentTimeMillis() - waitStartTime >= waitDurationMs) {
                 waitingAtTarget = false;
-                movingToTarget = false;
+                movingToTarget = !movingToTarget; // Toggle direction
             }
             return;
         }
@@ -110,13 +123,24 @@ public class TriggerPlatform extends Entity {
             hitbox.x = destX;
             hitbox.y = destY;
 
-            if (movingToTarget && shouldReturn) {
+            if (loop) {
+                // If looping, wait then reverse direction
+                waitingAtTarget = true;
+                waitStartTime = System.currentTimeMillis();
+            } else if (movingToTarget && shouldReturn) {
                 // Start waiting at target
                 waitingAtTarget = true;
                 waitStartTime = System.currentTimeMillis();
+                movingToTarget = false; // Next move is returning
             } else {
-                // Done moving
+                // Done moving (unless it was returning and loop is false)
+                if (!movingToTarget && shouldReturn) {
+                    // Returned to start, stop
+                    reachedTarget = true;
+                } else if (movingToTarget && !shouldReturn) {
+                    // Reached target, no return
                 reachedTarget = true;
+                }
             }
         } else {
             // Move towards destination
@@ -229,8 +253,9 @@ public class TriggerPlatform extends Entity {
         float spriteAreaH = hitbox.height * 2 / 3;
         float spriteAreaX = hitbox.x + hitbox.width / 6;
         float spriteAreaY = hitbox.y + hitbox.height / 6;
-        return new java.awt.geom.Rectangle2D.Float(
-                spriteAreaX, spriteAreaY, spriteAreaW, spriteAreaH);
+
+        cachedSpriteHitbox.setRect(spriteAreaX, spriteAreaY, spriteAreaW, spriteAreaH);
+        return cachedSpriteHitbox;
     }
 }
 
