@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import main.Game;
 import main.model.GameModel;
 
-//ONLY esponsible for rendering game visuals based on the model, all view things go here
 public class GameView {
     private final GameModel model;
 
@@ -18,9 +17,14 @@ public class GameView {
     }
 
     public void renderGame(Graphics g) {
+        //Draw Level
         model.getLevelManager().draw(g);
         model.getLevelManager().drawObjectLayer(g);
+
+        //Draw Player
         model.getPlayer().render(g);
+
+        //Draw the Foreground/UI
         model.getLevelManager().getCurrentLvl().drawSpawnPlatform(g);
         drawHUD(g);
 
@@ -29,12 +33,12 @@ public class GameView {
         }
     }
 
-    //
     public void renderTransition(Graphics g, BufferedImage transitionImage) {
         if (!model.isInTransition() || transitionImage == null) {
             return;
         }
 
+        // Ideally, pass these dimensions in via Constructor to avoid static dependency
         int gameWidth = Game.GAME_WIDTH;
         int gameHeight = Game.GAME_HEIGHT;
         float transitionScale = model.getTransitionScale();
@@ -66,18 +70,15 @@ public class GameView {
         g.setFont(new Font("Arial", Font.BOLD, 48));
         String text = "PAUSED";
         FontMetrics fm = g.getFontMetrics();
-        int textWidth = fm.stringWidth(text);
-        int x = (Game.GAME_WIDTH - textWidth) / 2;
+        int x = (Game.GAME_WIDTH - fm.stringWidth(text)) / 2;
         int y = (Game.GAME_HEIGHT - fm.getHeight()) / 2 + fm.getAscent();
         g.drawString(text, x, y);
 
         g.setFont(new Font("Arial", Font.PLAIN, 18));
         String hint = "Press P to resume game";
         fm = g.getFontMetrics();
-        int hintWidth = fm.stringWidth(hint);
-        int hx = (Game.GAME_WIDTH - hintWidth) / 2;
+        int hx = (Game.GAME_WIDTH - fm.stringWidth(hint)) / 2;
         int hy = y + 40;
         g.drawString(hint, hx, hy);
     }
 }
-

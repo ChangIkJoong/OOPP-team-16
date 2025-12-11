@@ -191,7 +191,7 @@ public class LevelManager {
             currentLevelIndex++;
 
             if (game != null) {
-                game.reloadPlayerForCurrentLevel();
+                game.reloadPlayerCurrentLevel();
             }
         } else {
             // Last level completed - return to main menu

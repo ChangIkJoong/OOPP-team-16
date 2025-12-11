@@ -2,30 +2,19 @@ package main;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import Levels.LevelManager;
 import audio.controller.AudioController;
 import entities.Player;
 import main.model.GameModel;
-import main.observerEvents.GameEventListener;
-import main.observerEvents.PlayerEventListener;
-import main.states.GameBaseState;
-import main.states.Leaderboard;
-import main.states.LeaderboardState;
-import main.states.LevelSelect;
-import main.states.LevelSelectState;
-import main.states.MainMenu;
-import main.states.MenuState;
-import main.states.PlayingState;
+import main.observerEvents.GameObserver;
+import main.states.*;
 import main.view.GamePanel;
 import main.view.GameView;
 import main.view.GameWindow;
 import utilz.LoadSave;
 
-public class Game extends PlayerEventListener implements Runnable {
+public class Game implements Runnable, GameObserver {
 
     public static final int TILES_DEAFULT_SIZE = 32;
     public static final float SCALE = 1.0f;
@@ -45,14 +34,15 @@ public class Game extends PlayerEventListener implements Runnable {
     private final int FPS_SET = 120;
     private final int UPS_SET = 200;
 
+    // MVC Components
+    private GameModel model;
+    private GameView view;
+
     private Player player;
     private LevelManager levelManager;
-    private AudioController audioController; // audio
-
-
+    private AudioController audioController;
 
     public enum GameState {MENU, PLAYING, LEADERBOARD, LEVEL_SELECT}
-
     private GameState gameState = GameState.MENU;
 
     private GameBaseState currentState;
@@ -62,10 +52,6 @@ public class Game extends PlayerEventListener implements Runnable {
     private LevelSelectState levelSelectState;
 
     private BufferedImage transitionImage;
-
-    private final List<GameEventListener> gameEventListeners = new ArrayList<>();
-    private GameModel model;
-    private GameView view;
 
     public Game() {
         audioController = AudioController.getInstance();
@@ -82,12 +68,16 @@ public class Game extends PlayerEventListener implements Runnable {
     }
 
     private void initClasses() {
+        // Initialize Data/Logic (Model parts)
         levelManager = new LevelManager(this);
         player = new Player(200, 550, (int) (32 * SCALE), (int) (32 * SCALE));
-        player.setPlayerEventListener(this);
+
         loadPlayerForCurrentLevel();
 
+        // Setup MVC
         model = new GameModel(player, levelManager);
+        model.addObserver(this); // Controller listens to Model
+
         view = new GameView(model);
 
         transitionImage = LoadSave.getSpriteAtlas(LoadSave.TRANSITION_IMG);
@@ -104,6 +94,50 @@ public class Game extends PlayerEventListener implements Runnable {
         currentState = menuState;
     }
 
+    // ==========================================================
+    //  OBSERVER IMPLEMENTATION (Replaces "Checkers")
+    // ==========================================================
+
+    @Override
+    public void onPlayerDied() {
+        // Controller Logic: Play Audio
+        audioController.playDead();
+        // Controller Logic: Update Environment
+        levelManager.getCurrentLvl().triggerSpawnPlatform();
+    }
+
+    @Override
+    public void onPlayerRespawn() {
+        audioController.playRespawn();
+        levelManager.getCurrentLvl().resetPlatforms();
+    }
+
+    @Override
+    public void onLevelCompleted() {
+        // 1. Calculate Score
+        long runEndTimeNanos = System.nanoTime();
+        double timeSeconds = (runEndTimeNanos - model.getStartTime()) / 1000000000.0;
+        int levelIndex = levelManager.getCurrentLevelIndex();
+
+        // 2. Persist Data (Save File)
+        LoadSave.appendToScoreFile(model.getPlayerName(), levelIndex, timeSeconds, model.getTotalDeaths());
+
+        // 3. Audio
+        audioController.playNextLevel();
+    }
+
+    @Override
+    public void onLevelLoadRequested() {
+        // Called when transition covers the screen, safe to swap heavy data if needed
+    }
+
+    @Override
+    public void onTransitionComplete() {
+        // Transition animation finished
+    }
+
+    // ==========================================================
+
     private void loadPlayerForCurrentLevel() {
         Levels.Level currentLevel = levelManager.getCurrentLvl();
         player.setSpawnPoint(currentLevel.getSpawnX(), currentLevel.getSpawnY());
@@ -114,55 +148,24 @@ public class Game extends PlayerEventListener implements Runnable {
         currentLevel.clearDeathPositions();
     }
 
-    public void reloadPlayerForCurrentLevel() {
+    public void reloadPlayerCurrentLevel() {
         loadPlayerForCurrentLevel();
     }
 
     private void update() {
-        if (model.isInTransition()) {
-            model.updateTransition();
-            return;
-        }
+        // 1. Update Model (Rules & Physics)
+        model.update();
+        // 2. Update Current State (Input/UI)
         currentState.update();
-    }
-
-    @Override
-    public void update(String eventType, File file) {
-
     }
 
     public void render(Graphics g) {
         currentState.render(g);
-
         view.renderTransition(g, transitionImage);
     }
 
-    //TODO maybe check if we can move this into observer patterns?
-    public void updateGameState() {
-        model.updatePlaying();
-
-        //TODO Abstract so that it listens for "PlayerDeath"
-        if (model.checkIsDead()) {
-            audioController.playDead();
-            levelManager.getCurrentLvl().triggerSpawnPlatform();
-        }
-
-        ///TODO Abstract so that it listens for "PlayerRespawn"
-        if (model.checkIsRespawn()) {
-            audioController.playRespawn();
-            levelManager.getCurrentLvl().resetPlatforms();
-        }
-
-        //TODO Abstract so that it listens for "LvlCompletedEvent"
-        if (model.checkIsEndOfLevel()) {
-            levelCompletedScoringUpdate();
-            audioController.playNextLevel();
-
-            player.resetLevelEnd();
-        }
-    }
-
     public void renderGame(Graphics g) {
+        // Delegate to View
         view.renderGame(g);
     }
 
@@ -175,7 +178,6 @@ public class Game extends PlayerEventListener implements Runnable {
     public void run() {
         double timePerFrame = 1000000000.0 / FPS_SET;
         double timePerUpdate = 1000000000.0 / UPS_SET;
-
         long previousTime = System.nanoTime();
 
         int frames = 0;
@@ -191,6 +193,7 @@ public class Game extends PlayerEventListener implements Runnable {
             deltaU += (currentTime - previousTime) / timePerUpdate;
             deltaF += (currentTime - previousTime) / timePerFrame;
             previousTime = currentTime;
+
             if (deltaU >= 1) {
                 update();
                 updates++;
@@ -203,69 +206,41 @@ public class Game extends PlayerEventListener implements Runnable {
             }
             if (System.currentTimeMillis() - lastCheck >= 1000) {
                 lastCheck = System.currentTimeMillis();
-                System.out.println("FPS: " + frames + "UPS: " + updates);
+                System.out.println("FPS: " + frames + " | UPS: " + updates);
                 frames = 0;
                 updates = 0;
             }
         }
     }
 
+    // Getters & Setters
+    public Player getPlayer() { return player; }
+    public void windowFocusLost() { player.resetDirBooleans(); }
+    public GameState getGameState() { return gameState; }
+    public AudioController getAudioController() { return audioController; }
+    public String getPlayerName() { return model.getPlayerName(); }
+    public void setPlayerName(String playerName) { model.setPlayerName(playerName); }
 
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void windowFocusLost() {
-        player.resetDirBooleans();
-    }
-
-    public GameState getGameState() {
-        return gameState;
-    }
-
-    //AUDIO CONTROL METHODS
-    public AudioController getAudioController() {
-        return audioController;
-    }
-
-    //PLAYER NAME METHODS
-    public String getPlayerName() {
-        return model.getPlayerName();
-    }
-
-    public void setPlayerName(String playerName) {
-        model.setPlayerName(playerName);
-    }
-
-    //GAME STATING
     public void setGameState(GameState newState) {
         GameState oldState = this.gameState;
         this.gameState = newState;
-
         model.setGameState(newState);
 
         GameBaseState previousState = currentState;
-        //TODO Move into playingState: onExit
+
         if (newState == GameState.MENU) {
-            // Reset transition state when returning to menu
-            if (model.isInTransition()) {
-                model.resetTransition();
-            }
+            if (model.isInTransition()) model.resetTransition();
             if (oldState == GameState.PLAYING) {
                 levelManager.resetToFirstLevel();
-                model.resetRunStats();
+                model.resetStats();
                 loadPlayerForCurrentLevel();
             }
         }
 
-        //TODO Move into playingState: onEnter
-        //If we are starting to play from the menu, start a fresh run (timer & deaths), for leaderboard
         if (newState == GameState.PLAYING && oldState == GameState.MENU) {
-            model.startNewRunTimer();
+            model.startNewTimer();
         }
 
-        //If we are starting to play from the level select menu, load the player for the selected level
         if (newState == GameState.PLAYING && oldState == GameState.LEVEL_SELECT) {
             loadPlayerForCurrentLevel();
         }
@@ -275,46 +250,12 @@ public class Game extends PlayerEventListener implements Runnable {
         case LEVEL_SELECT -> currentState = levelSelectState;
         case PLAYING -> currentState = playingState;
         case LEADERBOARD -> currentState = leaderboardState;
-        default -> {
-            // needed to satisfy checkstyle
-        }
         }
 
-        if (previousState != null && previousState != currentState) {
-            previousState.onExit();
-        }
-        if (currentState != null && previousState != currentState) {
-            currentState.onEnter();
-        }
+        if (previousState != null && previousState != currentState) previousState.onExit();
+        if (currentState != null && previousState != currentState) currentState.onEnter();
     }
 
-    //TODO move into EventListner / Observer abstration here?
-    @Override
-    public void onPlayerDeath() {
-        model.onPlayerDeath();
-
-        for (GameEventListener listener : gameEventListeners) {
-            listener.onPlayerDeath();
-        }
-    }
-
-    //TODO move into EventListner / Observer abstration here?
-    public void levelCompletedScoringUpdate() {
-        long runEndTimeNanos = System.nanoTime();
-        double timeSeconds = (runEndTimeNanos - model.getRunStartTimeNanos()) / 1000000000.0;
-        int levelIndex = levelManager.getCurrentLevelIndex();
-        LoadSave.appendToScoreFile(model.getPlayerName(), levelIndex, timeSeconds, model.getTotalDeathsForRun());
-
-        for (GameEventListener listener : gameEventListeners) {
-            listener.onLevelCompleted(levelIndex, model.getTotalDeathsForRun(), timeSeconds);
-        }
-    }
-
-    public void togglePause() {
-        model.togglePause();
-    }
-
-    public LevelManager getLevelManager() {
-        return model.getLevelManager();
-    }
+    public void togglePause() { model.togglePause(); }
+    public LevelManager getLevelManager() { return model.getLevelManager(); }
 }

@@ -1,33 +1,37 @@
 package main.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Levels.LevelManager;
 import entities.Player;
 import main.Game.GameState;
+import main.observerEvents.GameObserver;
 
-//ONLY put state and rules, meaning no rendering, no input. KEEP THIS ADHERANCE!
 public class GameModel {
 
     private final Player player;
     private final LevelManager levelManager;
 
+    // Observer List
+    private final List<GameObserver> observers = new ArrayList<>();
+
     private GameState gameState = GameState.MENU;
 
-    // Level transition
+    // Transition State
     private boolean inTransition = false;
-    private float transitionScale = 2f;
+    private float transitionScale = 0f;
     private boolean scalingUp = true;
     private boolean isLevelLoaded = false;
     private final float TRANSITION_SPEED = 0.015f;
 
+    // Logic Flags
     private boolean wasPlayerDead = false;
-    private boolean isDead = false;
-    private boolean isRespawn = false;
-    private boolean isEndOfLevel = false;
 
-    // Player name and run stats
+    // Stats
     private String playerName = "Player1";
-    private long runStartTimeNanos;
-    private int totalDeathsForRun;
+    private long startTime;
+    private int totalDeaths;
 
     private boolean paused = false;
 
@@ -36,6 +40,131 @@ public class GameModel {
         this.levelManager = levelManager;
     }
 
+    // --- Observer Pattern Logic ---
+    public void addObserver(GameObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    public void removeObserver(GameObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyPlayerDied() {
+        for (GameObserver obs : observers) obs.onPlayerDied();
+    }
+
+    private void notifyPlayerRespawn() {
+        for (GameObserver obs : observers) obs.onPlayerRespawn();
+    }
+
+    private void notifyLevelCompleted() {
+        for (GameObserver obs : observers) obs.onLevelCompleted();
+    }
+
+    private void notifyLevelLoadRequested() {
+        for (GameObserver obs : observers) obs.onLevelLoadRequested();
+    }
+
+    private void notifyTransitionComplete() {
+        for (GameObserver obs : observers) obs.onTransitionComplete();
+    }
+
+    // --- Update Loop ---
+    public void update() {
+        if (inTransition) {
+            updateTransition();
+            return;
+        }
+
+        if (gameState == GameState.PLAYING) {
+            updatePlaying();
+        }
+    }
+
+    private void updatePlaying() {
+        if (paused) return;
+
+        player.update();
+        levelManager.update();
+
+        boolean isPlayerDead = player.getHitbox().x > 1500;
+
+        if (!wasPlayerDead && isPlayerDead) {
+            // Player just died
+            totalDeaths++;
+            notifyPlayerDied();
+        } else if (wasPlayerDead && !isPlayerDead) {
+            notifyPlayerRespawn();
+        }
+        wasPlayerDead = isPlayerDead;
+
+        if (player.hasReachedLevelEnd()) {
+            notifyLevelCompleted();
+            startLevelTransition();
+            player.resetLevelEnd();
+        }
+    }
+
+    private void updateTransition() {
+        if (scalingUp) {
+            transitionScale += TRANSITION_SPEED;
+            if (transitionScale >= 2f) {
+                transitionScale = 2f;
+                if (!isLevelLoaded) {
+                    // Logic for swapping levels
+                    levelManager.setLevelScore(player.getDeathCount());
+                    player.resetDeathCount();
+                    levelManager.loadNextLevel();
+                    player.resetLevelEnd();
+
+                    isLevelLoaded = true;
+                    notifyLevelLoadRequested();
+                }
+                scalingUp = false;
+            }
+        } else {
+            transitionScale -= TRANSITION_SPEED;
+            if (transitionScale <= 0f) {
+                transitionScale = 0f;
+                inTransition = false;
+                notifyTransitionComplete();
+            }
+        }
+    }
+
+    public void startLevelTransition() {
+        inTransition = true;
+        scalingUp = true;
+        isLevelLoaded = false;
+        transitionScale = 0f;
+    }
+
+    public void resetTransition() {
+        inTransition = false;
+        scalingUp = true;
+        isLevelLoaded = false;
+        transitionScale = 0f;
+    }
+
+    public void resetStats() {
+        totalDeaths = 0;
+        startTime = 0L;
+    }
+
+    public void startNewTimer() {
+        totalDeaths = 0;
+        startTime = System.nanoTime();
+    }
+
+    public void togglePause() {
+        if (gameState == GameState.PLAYING && !inTransition) {
+            paused = !paused;
+        }
+    }
+
+    // --- Getters & Setters ---
     public Player getPlayer() {
         return player;
     }
@@ -56,12 +185,6 @@ public class GameModel {
         return paused;
     }
 
-    public void togglePause() {
-        if (gameState == GameState.PLAYING && !inTransition) {
-            paused = !paused;
-        }
-    }
-
     public boolean isInTransition() {
         return inTransition;
     }
@@ -80,113 +203,11 @@ public class GameModel {
         }
     }
 
-    public long getRunStartTimeNanos() {
-        return runStartTimeNanos;
+    public long getStartTime() {
+        return startTime;
     }
 
-    public int getTotalDeathsForRun() {
-        return totalDeathsForRun;
-    }
-
-
-    //TODO are these duplicates or am I tripping?... 2 am here
-    public void resetRunStats() {
-        totalDeathsForRun = 0;
-        runStartTimeNanos = 0L;
-    }
-
-    public void startNewRunTimer() {
-        totalDeathsForRun = 0;
-        runStartTimeNanos = System.nanoTime();
-    }
-
-    //TODO add to event listener, fine line between what is model vs controller behaviour....
-    public void onPlayerDeath() {
-        totalDeathsForRun++;
-    }
-
-
-    //TODO same here..
-    public void startLevelTransition() {
-        inTransition = true;
-        scalingUp = true;
-        isLevelLoaded = false;
-        transitionScale = 0f;
-    }
-
-    public void resetTransition() {
-        inTransition = false;
-        scalingUp = true;
-        isLevelLoaded = false;
-        transitionScale = 0f;
-    }
-
-    //True only on the frame where the player has just transitioned from alive to dead
-    public boolean checkIsDead() {
-        return isDead;
-    }
-
-    //True only on the frame where the player has just transitioned from dead back to alive
-    public boolean checkIsRespawn() {
-        return isRespawn;
-    }
-
-    //True only on the frame where the player has just reached the level end
-    public boolean checkIsEndOfLevel() {
-        return isEndOfLevel;
-    }
-
-    public void updatePlaying() {
-        if (paused) {
-            return;
-        }
-
-        // Reset edge flags at the start of the frame
-        isDead = false;
-        isRespawn = false;
-        isEndOfLevel = false;
-
-        boolean isPlayerDead = player.getHitbox().x > 1500;
-        if (!wasPlayerDead && isPlayerDead) {
-            // Player has just died this frame
-            isDead = true;
-        }
-        if (wasPlayerDead && !isPlayerDead) {
-            // Player has just respawned this frame
-            isRespawn = true;
-        }
-        wasPlayerDead = isPlayerDead;
-
-        player.update();
-        levelManager.update();
-
-        if (player.hasReachedLevelEnd()) {
-            isEndOfLevel = true;
-            startLevelTransition();
-            player.resetLevelEnd();
-        }
-    }
-
-    public void updateTransition() {
-        if (scalingUp) {
-            transitionScale += TRANSITION_SPEED;
-            if (transitionScale >= 2f) {
-                transitionScale = 2f;
-                if (!isLevelLoaded) {
-                    levelManager.setLevelScore(player.getDeathCount());
-                    player.resetDeathCount();
-                    levelManager.loadNextLevel();
-                    player.resetLevelEnd();
-                    isLevelLoaded = true;
-                }
-                scalingUp = false;
-            }
-        } else {
-            transitionScale -= TRANSITION_SPEED;
-            if (transitionScale <= 0f) {
-                transitionScale = 0f;
-                inTransition = false;
-            }
-        }
+    public int getTotalDeaths() {
+        return totalDeaths;
     }
 }
