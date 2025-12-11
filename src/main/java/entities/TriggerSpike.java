@@ -19,9 +19,11 @@ public class TriggerSpike extends Entity {
     private boolean waitingAtTarget = false;
     private long waitStartTime;
     private long waitDurationMs = 500;
+    private int id = -1; // Default ID means no group
 
     public TriggerSpike(float x, float y, float targetX, float targetY, int width, int height,
-                        float speed, float triggerDistance, BufferedImage sprite, boolean shouldReturn) {
+                        float speed, float triggerDistance, BufferedImage sprite, boolean shouldReturn, int id,
+                        int collisionWidth, int collisionHeight) {
         super(x, y, width, height);
         this.startX = x;
         this.startY = y;
@@ -31,7 +33,16 @@ public class TriggerSpike extends Entity {
         this.triggerDistance = triggerDistance;
         this.sprite = sprite;
         this.shouldReturn = shouldReturn;
-        initHitbox(x, y, width, height / 2);
+        this.id = id;
+        
+        // Calculate centered collision box relative to tile
+        int xOffset = (width - collisionWidth) / 2;
+        int yOffset = (height - collisionHeight) / 2;
+        initHitbox(x + xOffset, y + yOffset, collisionWidth, collisionHeight);
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void update() {

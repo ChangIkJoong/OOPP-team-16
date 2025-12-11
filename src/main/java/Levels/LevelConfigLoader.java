@@ -34,8 +34,9 @@ public class LevelConfigLoader {
         public float targetOffsetX;
         public float targetOffsetY;
         public float speed;
-        public boolean solid;
         public boolean shouldReturn;
+        public boolean solid;
+        public boolean shouldLoop;
     }
 
     public static class SpikeConfig {
@@ -51,6 +52,9 @@ public class LevelConfigLoader {
         public float speed;
         public float triggerDistance;
         public boolean shouldReturn;
+        public int id = -1; // Default to -1
+        public int collisionWidth = -1; // Default -1 means use default size
+        public int collisionHeight = -1; // Default -1 means use default size
     }
 
     public static LevelConfig loadConfig(String configFileName) {
@@ -95,6 +99,10 @@ public class LevelConfigLoader {
                     gtp.speed = Float.parseFloat(parts[3].trim());
                     gtp.shouldReturn = Boolean.parseBoolean(parts[4].trim());
                     gtp.solid = Boolean.parseBoolean(parts[5].trim());
+                    // Add default values for new fields if not present (backward compatibility)
+                    if (parts.length > 6) {
+                        gtp.shouldLoop = Boolean.parseBoolean(parts[6].trim());
+                    }
                     config.groupedTriggerPlatforms.add(gtp);
                 } else if (line.startsWith("spike=")) {
                     String[] parts = line.substring(6).split(",");
@@ -112,6 +120,13 @@ public class LevelConfigLoader {
                     tsc.speed = Float.parseFloat(parts[4].trim());
                     tsc.triggerDistance = Float.parseFloat(parts[5].trim());
                     tsc.shouldReturn = Boolean.parseBoolean(parts[6].trim());
+                    if (parts.length > 7) {
+                        tsc.id = Integer.parseInt(parts[7].trim());
+                    }
+                    if (parts.length > 9) {
+                        tsc.collisionWidth = Integer.parseInt(parts[8].trim());
+                        tsc.collisionHeight = Integer.parseInt(parts[9].trim());
+                    }
                     config.triggerSpikes.add(tsc);
                 }
             }
@@ -137,7 +152,7 @@ public class LevelConfigLoader {
         // Apply grouped trigger platforms
         for (GroupedTriggerPlatformConfig gtp : config.groupedTriggerPlatforms) {
             level.createGroupedTriggerPlatformFromTile(gtp.tileId, gtp.targetOffsetX, gtp.targetOffsetY,
-                    gtp.speed, levelSprite, gtp.shouldReturn, gtp.solid);
+                    gtp.speed, levelSprite, gtp.shouldReturn, gtp.solid, gtp.shouldLoop);
         }
 
         // Apply spikes
@@ -148,7 +163,8 @@ public class LevelConfigLoader {
         // Apply trigger spikes
         for (TriggerSpikeConfig tsc : config.triggerSpikes) {
             level.createTriggerSpikesFromTile(tsc.tileId, tsc.spriteId, tsc.targetOffsetX, tsc.targetOffsetY,
-                    tsc.speed, tsc.triggerDistance, objectSprite, tsc.shouldReturn);
+                    tsc.speed, tsc.triggerDistance, objectSprite, tsc.shouldReturn, tsc.id,
+                    tsc.collisionWidth, tsc.collisionHeight);
         }
     }
 }

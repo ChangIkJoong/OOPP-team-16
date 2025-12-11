@@ -8,11 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 import main.Game;
-
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
 import static main.Game.TILES_SIZE;
-
 import utilz.LoadSave;
 
 public class LevelManager {
@@ -102,8 +100,19 @@ public class LevelManager {
                 LoadSave.getLevelObjData(LoadSave.LEVEL_SIX_OBJ_DATA),
                 config6.spawnX, config6.spawnY);
         LevelConfigLoader.applyConfig(level6, config6, levelSprite, objectSprite, spawnTube);
-        level5.setAudioControllerForPlatforms(game.getAudioController());
+        level6.setAudioControllerForPlatforms(game.getAudioController());
         levels.add(level6);
+
+        // Level 7
+        LevelConfigLoader.LevelConfig config7 = LevelConfigLoader.loadConfig("level7.txt");
+        Level level7 = new Level(
+                LoadSave.getLevelData(LoadSave.LEVEL_SEVEN_DATA),
+                LoadSave.getLevelObstacleData(LoadSave.LEVEL_SEVEN_OBSTACLE_DATA),
+                LoadSave.getLevelObjData(LoadSave.LEVEL_SEVEN_OBJ_DATA),
+                config7.spawnX, config7.spawnY);
+        LevelConfigLoader.applyConfig(level7, config7, levelSprite, objectSprite, spawnTube);
+        level7.setAudioControllerForPlatforms(game.getAudioController());
+        levels.add(level7);
     }
 
     private void importOutsideSprites() {
@@ -170,7 +179,7 @@ public class LevelManager {
     }
 
     public Level getCurrentLvl() {
-        //return levels.get(5); // For Testing TODO
+        //return levels.get(6); // For Testing TODO
         return levels.get(currentLevelIndex);
     }
 
@@ -185,8 +194,10 @@ public class LevelManager {
                 game.reloadPlayerForCurrentLevel();
             }
         } else {
-            // Last level completed - game finished
-            // TODO: Implement end-of-game behavior (e.g., show finished screen)
+            // Last level completed - return to main menu
+            if (game != null) {
+                game.setGameState(main.Game.GameState.MENU);
+            }
         }
     }
 

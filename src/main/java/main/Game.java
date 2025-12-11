@@ -1,16 +1,17 @@
 package main;
 
-import audio.controller.AudioController;
-import entities.Player;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import Levels.LevelManager;
+import audio.controller.AudioController;
+import entities.Player;
+import main.model.GameModel;
 import main.observerEvents.GameEventListener;
 import main.observerEvents.PlayerEventListener;
-import main.model.GameModel;
 import main.states.GameBaseState;
 import main.states.Leaderboard;
 import main.states.LeaderboardState;
@@ -246,16 +247,27 @@ public class Game extends PlayerEventListener implements Runnable {
 
         GameBaseState previousState = currentState;
         //TODO Move into playingState: onExit
-        if (newState == GameState.MENU && oldState == GameState.PLAYING) {
-            levelManager.resetToFirstLevel();
-            model.resetRunStats();
-            loadPlayerForCurrentLevel();
+        if (newState == GameState.MENU) {
+            // Reset transition state when returning to menu
+            if (model.isInTransition()) {
+                model.resetTransition();
+            }
+            if (oldState == GameState.PLAYING) {
+                levelManager.resetToFirstLevel();
+                model.resetRunStats();
+                loadPlayerForCurrentLevel();
+            }
         }
 
         //TODO Move into playingState: onEnter
         //If we are starting to play from the menu, start a fresh run (timer & deaths), for leaderboard
         if (newState == GameState.PLAYING && oldState == GameState.MENU) {
             model.startNewRunTimer();
+        }
+
+        //If we are starting to play from the level select menu, load the player for the selected level
+        if (newState == GameState.PLAYING && oldState == GameState.LEVEL_SELECT) {
+            loadPlayerForCurrentLevel();
         }
 
         switch (newState) {
@@ -289,12 +301,12 @@ public class Game extends PlayerEventListener implements Runnable {
     //TODO move into EventListner / Observer abstration here?
     public void levelCompletedScoringUpdate() {
         long runEndTimeNanos = System.nanoTime();
-        double timeMilliSeconds = (runEndTimeNanos - model.getRunStartTimeNanos()) / 1000000.0;
+        double timeSeconds = (runEndTimeNanos - model.getRunStartTimeNanos()) / 1000000000.0;
         int levelIndex = levelManager.getCurrentLevelIndex();
-        LoadSave.appendToScoreFile(model.getPlayerName(), levelIndex, timeMilliSeconds, model.getTotalDeathsForRun());
+        LoadSave.appendToScoreFile(model.getPlayerName(), levelIndex, timeSeconds, model.getTotalDeathsForRun());
 
         for (GameEventListener listener : gameEventListeners) {
-            listener.onLevelCompleted(levelIndex, model.getTotalDeathsForRun(), timeMilliSeconds);
+            listener.onLevelCompleted(levelIndex, model.getTotalDeathsForRun(), timeSeconds);
         }
     }
 

@@ -114,6 +114,13 @@ public class GameModel {
         transitionScale = 0f;
     }
 
+    public void resetTransition() {
+        inTransition = false;
+        scalingUp = true;
+        isLevelLoaded = false;
+        transitionScale = 0f;
+    }
+
     //True only on the frame where the player has just transitioned from alive to dead
     public boolean checkIsDead() {
         return isDead;

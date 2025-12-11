@@ -1,10 +1,9 @@
 package main.states;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.FontMetrics;
-
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,24 +48,31 @@ public class Leaderboard {
         int levelNumber = levelIndex + 1;
 
         for (String line : lines) {
+            // Skip empty lines
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+
             String[] parts = line.split(";");
             if (parts.length < 4) {
                 continue;
             }
             try {
-                String name = parts[0];
-                int level = Integer.parseInt(parts[1]);
-                int deaths = Integer.parseInt(parts[2]);
-                double time = Double.parseDouble(parts[3]);
+                String name = parts[0].trim();
+                int level = Integer.parseInt(parts[1].trim());
+                int deaths = Integer.parseInt(parts[2].trim());
+                // Handle both dot and comma decimal separators
+                String timeStr = parts[3].trim().replace(",", ".");
+                double time = Double.parseDouble(timeStr);
                 if (level == levelNumber) {
                     entries.add(new Entry(name, level, deaths, time));
                 }
             } catch (NumberFormatException ignored) {
-                System.out.println(line);
+                System.out.println("Failed to parse leaderboard line: " + line);
             }
         }
 
-        // score per - Fewest deaths & lowest time
+        // score per - Fewest deaths & lowest time (in seconds)
         entries.sort(Comparator.comparingInt((Entry e) -> e.deaths).thenComparingDouble(e -> e.time));
 
         // Keep only top 5 for this level
@@ -134,7 +140,7 @@ public class Leaderboard {
         g.drawString("#", headerCalculatedColumnSpaceRank, startY);
         g.drawString("Name", headerCalculatedColumnSpaceName, startY);
         g.drawString("Deaths", headerCalculatedColumnSpaceDeaths, startY);
-        g.drawString("Time (ms)", headerCalculatedColumnSpaceTime, startY);
+        g.drawString("Time (s)", headerCalculatedColumnSpaceTime, startY);
 
         // rows
         g.setFont(rowFont);
@@ -145,7 +151,7 @@ public class Leaderboard {
             g.drawString(String.valueOf(i + 1), headerCalculatedColumnSpaceRank, rowY);
             g.drawString(e.name, headerCalculatedColumnSpaceName, rowY);
             g.drawString(String.valueOf(e.deaths), headerCalculatedColumnSpaceDeaths, rowY);
-            g.drawString(String.format("%.4f", e.time), headerCalculatedColumnSpaceTime, rowY);
+            g.drawString(String.format("%.2f", e.time), headerCalculatedColumnSpaceTime, rowY);
             rowY += 26;
         }
 

@@ -101,7 +101,7 @@ public class Level {
      */
     public void createGroupedTriggerPlatformFromTile(
             int tileId, float targetOffsetX, float targetOffsetY, float speed,
-            BufferedImage[] sprites, boolean shouldReturn, boolean solid) {
+            BufferedImage[] sprites, boolean shouldReturn, boolean solid, boolean shouldLoop) {
 
         // Find all tiles with this ID
         List<int[]> positions = new ArrayList<>();
@@ -150,6 +150,7 @@ public class Level {
         );
 
         platform.setSolid(solid);
+        platform.setLoop(shouldLoop);
 
         // Set first tile position relative to bounding box
         platform.setFirstTileOffset((
@@ -251,7 +252,44 @@ public class Level {
             if (!platform.isTriggered() && platform.checkPlayerCollision(player)) {
                 platform.trigger();
             }
+
+            float oldX = platform.getHitbox().x;
+            float oldY = platform.getHitbox().y;
+
             platform.update();
+
+            float dx = platform.getHitbox().x - oldX;
+            float dy = platform.getHitbox().y - oldY;
+
+            if ((dx != 0 || dy != 0) && platform.isSolid()) {
+                java.awt.geom.Rectangle2D.Float platHitbox = platform.getSpriteHitbox();
+                // Reconstruct previous position
+                float prevPlatX = platHitbox.x - dx;
+                float prevPlatY = platHitbox.y - dy;
+
+                java.awt.geom.Rectangle2D.Float playerHitbox = player.getHitbox();
+                float playerBottom = playerHitbox.y + playerHitbox.height;
+
+                // Check if player was standing on the platform before it moved
+                boolean verticallyAligned = playerBottom >= prevPlatY && playerBottom <= prevPlatY + 5;
+                boolean horizontallyOverlapping =
+                        playerHitbox.x + playerHitbox.width > prevPlatX &&
+                                playerHitbox.x < prevPlatX + platHitbox.width;
+
+                if (verticallyAligned && horizontallyOverlapping) {
+                    // Check if player can move here before applying the movement
+                    if (utilz.HelpMethods.canMoveHere(
+                            player.getHitbox().x + dx,
+                            player.getHitbox().y + dy,
+                            player.getHitbox().width,
+                            player.getHitbox().height,
+                            lvlData)) {
+
+                        player.getHitbox().x += dx;
+                        player.getHitbox().y += dy;
+                    }
+                }
+            }
         }
     }
 
@@ -336,7 +374,8 @@ public class Level {
     public void createTriggerSpikesFromTile(int tileId, int spriteId, float targetOffsetX,
                                             float targetOffsetY, float speed,
                                             float triggerDistance, BufferedImage[] sprites,
-                                            boolean shouldReturn) {
+                                            boolean shouldReturn, int id,
+                                            int collisionWidth, int collisionHeight) {
 
         for (int y = 0; y < lvlObstacleData.length; y++) {
             for (int x = 0; x < lvlObstacleData[y].length; x++) {
@@ -344,13 +383,19 @@ public class Level {
                     float posX = x * Game.TILES_SIZE;
                     float posY = y * Game.TILES_SIZE;
 
+                    // Use provided collision size or default to full width, half height
+                    int cWidth = (collisionWidth > 0) ? collisionWidth : Game.TILES_SIZE;
+                    int cHeight = (collisionHeight > 0) ? collisionHeight : Game.TILES_SIZE / 2;
+
                     TriggerSpike spike = new TriggerSpike(
                             posX, posY,
                             posX + targetOffsetX, posY + targetOffsetY,
                             Game.TILES_SIZE, Game.TILES_SIZE,
                             speed, triggerDistance,
                             sprites[spriteId],
-                            shouldReturn
+                            shouldReturn,
+                            id,
+                            cWidth, cHeight
                     );
                     triggerSpikes.add(spike);
                 }
@@ -362,6 +407,14 @@ public class Level {
         for (TriggerSpike spike : triggerSpikes) {
             if (!spike.isTriggered() && spike.checkTriggerDistance(player)) {
                 spike.trigger();
+                // If this spike has a group ID, trigger all others with the same ID
+                if (spike.getId() != -1) {
+                    for (TriggerSpike otherSpike : triggerSpikes) {
+                        if (otherSpike.getId() == spike.getId()) {
+                            otherSpike.trigger();
+                        }
+                    }
+                }
             }
             spike.update();
         }
