@@ -4,9 +4,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashSet;
 import java.util.Set;
 
-import main.Game;
+import main.controller.Game;
 
-import static main.Game.GAME_HEIGHT;
+import static main.controller.Game.GAME_HEIGHT;
 
 public class HelpMethods {
 

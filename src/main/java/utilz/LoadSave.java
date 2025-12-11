@@ -16,7 +16,7 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
-import main.Game;
+import main.controller.Game;
 
 public class LoadSave {
 

@@ -3,10 +3,10 @@ package main.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import Levels.LevelManager;
-import entities.Player;
-import main.Game.GameState;
-import main.observerEvents.GameObserver;
+import main.model.Levels.LevelManager;
+import main.model.entities.Player;
+import main.model.observerEvents.GameObserver;
+import utilz.LoadSave;
 
 public class GameModel {
 
@@ -16,14 +16,15 @@ public class GameModel {
     // Observer List
     private final List<GameObserver> observers = new ArrayList<>();
 
-    private GameState gameState = GameState.MENU;
+    // Controller-independent playing flag
+    private boolean isActive = false;
 
     // Transition State
     private boolean inTransition = false;
     private float transitionScale = 0f;
     private boolean scalingUp = true;
     private boolean isLevelLoaded = false;
-    private final float TRANSITION_SPEED = 0.015f;
+    private static final float TRANSITION_SPEED = 0.015f;
 
     // Logic Flags
     private boolean wasPlayerDead = false;
@@ -52,23 +53,33 @@ public class GameModel {
     }
 
     private void notifyPlayerDied() {
-        for (GameObserver obs : observers) obs.onPlayerDied();
+        for (GameObserver obs : observers) {
+            obs.onPlayerDied();
+        }
     }
 
     private void notifyPlayerRespawn() {
-        for (GameObserver obs : observers) obs.onPlayerRespawn();
+        for (GameObserver obs : observers) {
+            obs.onPlayerRespawn();
+        }
     }
 
     private void notifyLevelCompleted() {
-        for (GameObserver obs : observers) obs.onLevelCompleted();
+        for (GameObserver obs : observers) {
+            obs.onLevelCompleted();
+        }
     }
 
     private void notifyLevelLoadRequested() {
-        for (GameObserver obs : observers) obs.onLevelLoadRequested();
+        for (GameObserver obs : observers) {
+            obs.onLevelLoadRequested();
+        }
     }
 
     private void notifyTransitionComplete() {
-        for (GameObserver obs : observers) obs.onTransitionComplete();
+        for (GameObserver obs : observers) {
+            obs.onTransitionComplete();
+        }
     }
 
     // --- Update Loop ---
@@ -78,13 +89,15 @@ public class GameModel {
             return;
         }
 
-        if (gameState == GameState.PLAYING) {
+        if (isActive) {
             updatePlaying();
         }
     }
 
     private void updatePlaying() {
-        if (paused) return;
+        if (paused) {
+            return;
+        }
 
         player.update();
         levelManager.update();
@@ -159,9 +172,44 @@ public class GameModel {
     }
 
     public void togglePause() {
-        if (gameState == GameState.PLAYING && !inTransition) {
+        if (isActive && !inTransition) {
             paused = !paused;
         }
+    }
+
+    public void onEnterMenuFromPlaying() {
+        resetTransition();
+        resetStats();
+        levelManager.resetToFirstLevel();
+        reloadPlayerForCurrentLevel();
+    }
+
+    public void onEnterPlayingFromMenu() {
+        resetTransition();
+        startNewTimer();
+    }
+
+    public void onEnterPlayingFromLevelSelect() {
+        resetTransition();
+        reloadPlayerForCurrentLevel();
+    }
+
+    private void reloadPlayerForCurrentLevel() {
+        main.model.Levels.Level currentLevel = levelManager.getCurrentLvl();
+        player.setSpawnPoint(currentLevel.getSpawnX(), currentLevel.getSpawnY());
+        player.loadLvlData(currentLevel.getLevelData());
+        player.setCurrentLevel(currentLevel);
+        player.spawnAtLevelStart();
+        currentLevel.resetPlatforms();
+        currentLevel.clearDeathPositions();
+    }
+
+    // Scoring and persistence related to model state
+    public void recordLevelCompletion() {
+        long runEndTimeNanos = System.nanoTime();
+        double timeSeconds = (runEndTimeNanos - startTime) / 1_000_000_000.0;
+        int levelIndex = levelManager.getCurrentLevelIndex();
+        LoadSave.appendToScoreFile(playerName, levelIndex, timeSeconds, totalDeaths);
     }
 
     // --- Getters & Setters ---
@@ -171,14 +219,6 @@ public class GameModel {
 
     public LevelManager getLevelManager() {
         return levelManager;
-    }
-
-    public GameState getGameState() {
-        return gameState;
-    }
-
-    public void setGameState(GameState state) {
-        this.gameState = state;
     }
 
     public boolean isPaused() {
@@ -203,11 +243,7 @@ public class GameModel {
         }
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public int getTotalDeaths() {
-        return totalDeaths;
+    public void setGameActive(boolean isPlaying) {
+        this.isActive = isPlaying;
     }
 }
