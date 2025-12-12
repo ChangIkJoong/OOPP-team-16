@@ -18,11 +18,11 @@ public class Player extends Entity {
     private int aniIndex;
     private int aniSpeed = 15;
     private int playerAction = IDLE_RIGHT;
-    private boolean left;
-    private boolean right;
+    private boolean isLeft;
+    private boolean isRight;
     private boolean facingRight;
-    private boolean moving = false;
-    private boolean jump = false;
+    private boolean isMoving = false;
+    private boolean isJump = false;
     private float playerSpeed = 1.0f;
 
     // Jumping / gravity mechanic
@@ -47,9 +47,6 @@ public class Player extends Entity {
 
     private main.model.Levels.Level currentLevel;
 
-    // REMOVED: PlayerEventListener playerEventListener;
-    // The Player is now a pure Entity. It does not know about the Controller.
-
     public Player(float x, float y, int width, int height) {
         super(x, y, width, height);
         loadAnimatons();
@@ -57,8 +54,6 @@ public class Player extends Entity {
         spawnX = x;
         spawnY = y;
     }
-
-    // REMOVED: setPlayerEventListener(Game listener)
 
     public void update() {
         if (isDead) {
@@ -69,7 +64,6 @@ public class Player extends Entity {
             return;
         }
 
-        // Check for hazards
         if (isEntityDead(hitbox, lvlData)
                 || (currentLevel != null && currentLevel.checkSpikeCollision(this))
                 || (currentLevel != null && currentLevel.checkTriggerSpikeCollision(this))) {
@@ -77,7 +71,7 @@ public class Player extends Entity {
             return;
         }
 
-        // Check for level completion
+        //level completion
         if (isOnLevelEnd(hitbox, lvlData)) {
             reachedLevelEnd = true;
         }
@@ -92,15 +86,14 @@ public class Player extends Entity {
         isDead = true;
         deathTime = System.currentTimeMillis();
 
-        // 1. Record visual death position for the level to render a corpse/blood
+        //Record visual death position
         if (currentLevel != null) {
             BufferedImage deathSprite = LoadSave.getSpriteAtlas(LoadSave.PLAYER_DEAD);
             currentLevel.recordDeathPosition(hitbox.x - xDrawOffset, hitbox.y - yDrawOffset, deathSprite);
         }
 
-        // 2. Move player off-screen "Into the Abyss"
-        // The GameModel detects this specific coordinate change (x > 1500)
-        // to trigger the "onPlayerDied" observer event.
+        //Move player off-screen
+        //change (x > 1500) -> "onPlayerDied" observer event.
         hitbox.x = 2000;
         hitbox.y = 2000;
 
@@ -115,28 +108,28 @@ public class Player extends Entity {
 
         resetDirBooleans();
         airSpeed = 0;
-        moving = false;
-        jump = false;
+        isMoving = false;
+        isJump = false;
 
         inAir = !isEntityOnFloor(hitbox, lvlData);
     }
 
     public void updatePos() {
-        moving = false;
-        if (jump) {
+        isMoving = false;
+        if (isJump) {
             jump();
         }
 
-        if (!left && !right && !inAir) {
+        if (!isLeft && !isRight && !inAir) {
             return;
         }
         float xSpeed = 0;
 
-        if (left) {
+        if (isLeft) {
             xSpeed -= playerSpeed;
         }
 
-        if (right) {
+        if (isRight) {
             xSpeed += playerSpeed;
         }
 
@@ -173,7 +166,7 @@ public class Player extends Entity {
         } else {
             updateXPos(xSpeed);
         }
-        moving = true;
+        isMoving = true;
     }
 
     private void jump() {
@@ -198,7 +191,7 @@ public class Player extends Entity {
         }
     }
 
-    // --- State Getters / Setters ---
+    //Getters & Setters ------------------------
 
     public boolean hasReachedLevelEnd() {
         return reachedLevelEnd;
@@ -217,28 +210,28 @@ public class Player extends Entity {
     }
 
     public void resetDirBooleans() {
-        left = false;
-        right = false;
+        isLeft = false;
+        isRight = false;
     }
 
     public boolean isLeft() {
-        return left;
+        return isLeft;
     }
 
     public void setLeft(boolean left) {
-        this.left = left;
+        this.isLeft = left;
     }
 
     public boolean isRight() {
-        return right;
+        return isRight;
     }
 
     public void setRight(boolean right) {
-        this.right = right;
+        this.isRight = right;
     }
 
     public void setJump(boolean jump) {
-        this.jump = jump;
+        this.isJump = jump;
     }
 
     public void setCurrentLevel(main.model.Levels.Level level) {
@@ -262,16 +255,15 @@ public class Player extends Entity {
         hitbox.y = spawnY;
         resetDirBooleans();
         airSpeed = 0;
-        moving = false;
-        jump = false;
+        isMoving = false;
+        isJump = false;
         isDead = false;
         reachedLevelEnd = false;
         inAir = !isEntityOnFloor(hitbox, lvlData);
     }
 
-    // --- Rendering / Animations ---
-    // (Ideally, these would be moved to GameView in a strict MVC refactor,
-    // but kept here to ensure the rendering system remains functional for now)
+    //Rendering---------------------------------------
+    //TODO?? move to GameView: MVC
 
     public void render(Graphics g) {
         g.drawImage(animation[playerAction][aniIndex],
@@ -292,11 +284,11 @@ public class Player extends Entity {
     private void setAnimation() {
         int startAni = playerAction;
 
-        if (moving) {
-            if (left) {
+        if (isMoving) {
+            if (isLeft) {
                 playerAction = RUNNING_LEFT;
                 facingRight = false;
-            } else if (right) {
+            } else if (isRight) {
                 facingRight = true;
                 playerAction = RUNNING_RIGHT;
             }
@@ -308,7 +300,7 @@ public class Player extends Entity {
             }
         }
 
-        if (jump) {
+        if (isJump) {
             if (!facingRight) {
                 playerAction = JUMPING_LEFT;
             } else {
