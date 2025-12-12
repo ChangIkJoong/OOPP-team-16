@@ -104,9 +104,8 @@ public class Game implements Runnable, GameObserver {
 
     @Override
     public void onPlayerDied() {
-        //Controller Logic: Play Audio
         audioController.playDead();
-        //Controller Logic: Update Environment
+        //update Environment
         levelManager.getCurrentLvl().triggerSpawnPlatform();
     }
 
@@ -125,7 +124,7 @@ public class Game implements Runnable, GameObserver {
 
     @Override
     public void onLevelLoadRequested() {
-        //Called when transition covers the screen, safe to swap heavy data if needed
+        //Called when transition covers the screen
     }
 
     @Override
@@ -133,7 +132,7 @@ public class Game implements Runnable, GameObserver {
         //Transition animation finished
     }
 
-    //==========================================================
+    //-------------------------------------------
 
     private void loadPlayerForCurrentLevel() {
         main.model.Levels.Level currentLevel = levelManager.getCurrentLvl();
@@ -209,7 +208,7 @@ public class Game implements Runnable, GameObserver {
         }
     }
 
-    //Getters & Setters
+    //Getters & Setters-------------
     public Player getPlayer() {
         return player;
     }

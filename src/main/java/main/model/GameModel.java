@@ -182,12 +182,15 @@ public class GameModel {
 
     public void onEnterPlayingFromMenu() {
         resetTransition();
+        resetStats();
         startNewTimer();
     }
 
     public void onEnterPlayingFromLevelSelect() {
         resetTransition();
+        resetStats();
         reloadPlayerForCurrentLevel();
+        startNewTimer();
     }
 
     private void reloadPlayerForCurrentLevel() {
