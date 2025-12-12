@@ -5,11 +5,11 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
-import inputs.KeyboardInputs;
-import inputs.MouseInputs;
-import main.Game;
-import static main.Game.GAME_HEIGHT;
-import static main.Game.GAME_WIDTH;
+import main.controller.inputs.KeyboardInputs;
+import main.controller.inputs.MouseInputs;
+import main.controller.Game;
+import static main.controller.Game.GAME_HEIGHT;
+import static main.controller.Game.GAME_WIDTH;
 
 public class GamePanel extends JPanel {
     private MouseInputs mouseInputs;
