@@ -140,7 +140,7 @@ public class TriggerPlatform extends Entity {
                     reachedTarget = true;
                 } else if (movingToTarget && !shouldReturn) {
                     // Reached target, no return
-                reachedTarget = true;
+                    reachedTarget = true;
                 }
             }
         } else {

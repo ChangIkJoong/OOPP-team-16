@@ -9,6 +9,8 @@ import main.model.observerEvents.GameObserver;
 import utilities.LoadSave;
 
 public class GameModel {
+    private static final float TRANSITION_SPEED = 0.015f;
+
 
     private final Player player;
     private final LevelManager levelManager;
@@ -24,7 +26,6 @@ public class GameModel {
     private float transitionScale = 0f;
     private boolean scalingUp = true;
     private boolean isLevelLoaded = false;
-    private static final float TRANSITION_SPEED = 0.015f;
 
     // Logic Flags
     private boolean wasPlayerDead = false;

@@ -13,7 +13,10 @@ import main.view.interfaces.GamingState;
 import main.view.interfaces.LeaderboardState;
 import main.view.interfaces.LevelSelectState;
 import main.view.interfaces.MenuState;
-import main.view.states.*;
+import main.view.states.Leaderboard;
+import main.view.states.LevelSelect;
+import main.view.states.MainMenu;
+
 import main.view.GamePanel;
 import main.view.GameView;
 import main.view.GameWindow;
@@ -258,10 +261,15 @@ public class Game implements Runnable, GameObserver {
         case LEVEL_SELECT -> currentState = levelSelectState;
         case PLAYING -> currentState = gamingState;
         case LEADERBOARD -> currentState = leaderboardState;
+        default -> currentState = menuState;
         }
 
-        if (previousState != null && previousState != currentState) previousState.onExit();
-        if (currentState != null && previousState != currentState) currentState.onEnter();
+        if (previousState != null && previousState != currentState) {
+            previousState.onExit();
+        }
+        if (currentState != null && previousState != currentState) {
+            currentState.onEnter();
+        }
     }
 
     public void togglePause() {

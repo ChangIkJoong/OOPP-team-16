@@ -188,7 +188,8 @@ public class LoadSave {
         Path path = getLeaderboardPath();
         int humanLevel = levelIndex + 1;
 
-        String line = playerName + ";" + humanLevel + ";" + deaths + ";" + String.format(Locale.US, "%.2f", timeSeconds);
+        String line = playerName + ";" + humanLevel + ";" +
+                deaths + ";" + String.format(Locale.US, "%.2f", timeSeconds);
 
         try (BufferedWriter writer = Files.newBufferedWriter(
                 path,

@@ -6,8 +6,19 @@ import java.awt.image.BufferedImage;
 import main.controller.Game;
 import utilities.LoadSave;
 
-import static utilities.Constants.PlayerConstants.*;
-import static utilities.HelpMethods.*;
+import static utilities.Constants.PlayerConstants.IDLE_LEFT;
+import static utilities.Constants.PlayerConstants.IDLE_RIGHT;
+import static utilities.Constants.PlayerConstants.JUMPING_LEFT;
+import static utilities.Constants.PlayerConstants.JUMPING_RIGHT;
+import static utilities.Constants.PlayerConstants.RUNNING_LEFT;
+import static utilities.Constants.PlayerConstants.RUNNING_RIGHT;
+import static utilities.Constants.PlayerConstants.getSpriteAmount;
+import static utilities.HelpMethods.canMoveHere;
+import static utilities.HelpMethods.getEntityXPosNextToWall;
+import static utilities.HelpMethods.getEntityYPosUnderOrAbove;
+import static utilities.HelpMethods.isEntityDead;
+import static utilities.HelpMethods.isEntityOnFloor;
+import static utilities.HelpMethods.isOnLevelEnd;
 
 public class Player extends Entity {
 
