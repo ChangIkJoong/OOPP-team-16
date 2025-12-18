@@ -1,4 +1,4 @@
-package main.model.Levels;
+package main.model.levels;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.model.entities.SpawnPlatform;
+import main.model.entities.entity.SpawnPlatform;
 
 public class LevelConfigLoader {
 

@@ -3,9 +3,9 @@ package main.controller;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import main.model.Levels.LevelManager;
+import main.model.levels.LevelManager;
 import audio.controller.AudioController;
-import main.model.entities.Player;
+import main.model.entities.entity.Player;
 import main.model.GameModel;
 import main.model.observerEvents.GameObserver;
 import main.view.interfaces.GameBaseState;
@@ -138,7 +138,7 @@ public class Game implements Runnable, GameObserver {
     //-------------------------------------------
 
     private void loadPlayerForCurrentLevel() {
-        main.model.Levels.Level currentLevel = levelManager.getCurrentLvl();
+        main.model.levels.Level currentLevel = levelManager.getCurrentLvl();
         player.setSpawnPoint(currentLevel.getSpawnX(), currentLevel.getSpawnY());
         player.loadLvlData(currentLevel.getLevelData());
         player.setCurrentLevel(currentLevel);

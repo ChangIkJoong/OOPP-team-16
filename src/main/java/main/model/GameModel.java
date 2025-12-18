@@ -3,8 +3,8 @@ package main.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.model.Levels.LevelManager;
-import main.model.entities.Player;
+import main.model.levels.LevelManager;
+import main.model.entities.entity.Player;
 import main.model.observerEvents.GameObserver;
 import utilities.LoadSave;
 
@@ -99,7 +99,7 @@ public class GameModel {
         player.update();
         levelManager.update();
 
-        boolean isPlayerDead = player.getHitbox().x > 1500;
+        boolean isPlayerDead = player.isDead();
 
         if (!wasPlayerDead && isPlayerDead) {
             // Player just died
@@ -195,7 +195,7 @@ public class GameModel {
     }
 
     private void reloadPlayerForCurrentLevel() {
-        main.model.Levels.Level currentLevel = levelManager.getCurrentLvl();
+        main.model.levels.Level currentLevel = levelManager.getCurrentLvl();
         player.setSpawnPoint(currentLevel.getSpawnX(), currentLevel.getSpawnY());
         player.loadLvlData(currentLevel.getLevelData());
         player.setCurrentLevel(currentLevel);

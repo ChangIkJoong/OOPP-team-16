@@ -1,43 +1,38 @@
-package main.model.entities;
+package main.model.entities.entity;
+
+import main.model.entities.states.MovingPlatformModel;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 public class MovingPlatform extends Entity {
 
-    private float startX;
-    private float startY;
-    private float endX;
-    private float endY;
-    private float speed;
-    private boolean movingToEnd = true;
+    private final MovingPlatformModel model;
+
     private BufferedImage sprite;
 
     public MovingPlatform(float startX, float startY, float endX, float endY,
                           int width, int height, float speed, BufferedImage sprite) {
         super(startX, startY, width, height);
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
-        this.speed = speed;
         this.sprite = sprite;
         initHitbox(startX, startY, width, height);
+        this.model = new MovingPlatformModel(hitbox, startX, startY, endX, endY, speed);
     }
 
     public void update() {
-        float targetX = movingToEnd ? endX : startX;
-        float targetY = movingToEnd ? endY : startY;
+        float targetX = model.isMovingToEnd() ? model.getEndX() : model.getStartX();
+        float targetY = model.isMovingToEnd() ? model.getEndY() : model.getStartY();
 
         float dirX = targetX - hitbox.x;
         float dirY = targetY - hitbox.y;
         float distance = (float) Math.sqrt(dirX * dirX + dirY * dirY);
 
+        float speed = model.getSpeed();
         if (distance < speed) {
             // Reached target, switch direction
             hitbox.x = targetX;
             hitbox.y = targetY;
-            movingToEnd = !movingToEnd;
+            model.setMovingToEnd(!model.isMovingToEnd());
         } else {
             // Move towards target
             hitbox.x += (dirX / distance) * speed;

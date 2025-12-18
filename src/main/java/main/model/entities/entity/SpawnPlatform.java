@@ -1,4 +1,4 @@
-package main.model.entities;
+package main.model.entities.entity;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

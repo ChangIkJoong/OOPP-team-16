@@ -1,17 +1,17 @@
-package main.model.Levels;
+package main.model.levels;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.model.entities.DeathSprite;
-import main.model.entities.Entity;
-import main.model.entities.MovingPlatform;
-import main.model.entities.SpawnPlatform;
-import main.model.entities.Spike;
-import main.model.entities.TriggerPlatform;
-import main.model.entities.TriggerSpike;
+import main.model.entities.entity.DeathSprite;
+import main.model.entities.entity.Entity;
+import main.model.entities.entity.MovingPlatform;
+import main.model.entities.entity.SpawnPlatform;
+import main.model.entities.entity.Spike;
+import main.model.entities.entity.TriggerPlatform;
+import main.model.entities.entity.TriggerSpike;
 import main.controller.Game;
 
 public class Level {
@@ -322,7 +322,7 @@ public class Level {
             return;
         }
 
-        // Find the ground Y position - use player's Y if on ground, otherwise find ground below
+        //use player's Y if on ground, otherwise find ground below
         float groundY = utilities.HelpMethods.findGroundY(x, y, Game.TILES_SIZE, lvlData);
 
         // Only place death sprite if there's valid ground (not -1)
@@ -371,11 +371,12 @@ public class Level {
         }
     }
 
-    public void createTriggerSpikesFromTile(int tileId, int spriteId, float targetOffsetX,
-                                            float targetOffsetY, float speed,
-                                            float triggerDistance, BufferedImage[] sprites,
-                                            boolean shouldReturn, int id,
-                                            int collisionWidth, int collisionHeight) {
+    public void createTriggerSpikesFromTile(
+            int tileId, int spriteId, float targetOffsetX,
+            float targetOffsetY, float speed,
+            float triggerDistance, BufferedImage[] sprites,
+            boolean shouldReturn, int id,
+            int collisionWidth, int collisionHeight) {
 
         for (int y = 0; y < lvlObstacleData.length; y++) {
             for (int x = 0; x < lvlObstacleData[y].length; x++) {

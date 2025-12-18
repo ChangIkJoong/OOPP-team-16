@@ -1,79 +1,62 @@
-package main.model.entities;
+package main.model.entities.entity;
+
+import main.model.entities.states.TriggerSpikeModel;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 public class TriggerSpike extends Entity {
 
-    private float startX;
-    private float startY;
-    private float targetX;
-    private float targetY;
-    private float speed;
-    private BufferedImage sprite;
-    private boolean triggered = false;
-    private boolean reachedTarget = false;
-    private float triggerDistance;
-    private boolean shouldReturn;
-    private boolean movingToTarget = true;
-    private boolean waitingAtTarget = false;
-    private long waitStartTime;
-    private long waitDurationMs = 500;
-    private int id = -1; // Default ID means no group
+    private final TriggerSpikeModel model;
 
     public TriggerSpike(float x, float y, float targetX, float targetY, int width, int height,
                         float speed, float triggerDistance, BufferedImage sprite, boolean shouldReturn, int id,
                         int collisionWidth, int collisionHeight) {
         super(x, y, width, height);
-        this.startX = x;
-        this.startY = y;
-        this.targetX = targetX;
-        this.targetY = targetY;
-        this.speed = speed;
-        this.triggerDistance = triggerDistance;
-        this.sprite = sprite;
-        this.shouldReturn = shouldReturn;
-        this.id = id;
-        
+
         // Calculate centered collision box relative to tile
         int xOffset = (width - collisionWidth) / 2;
         int yOffset = (height - collisionHeight) / 2;
         initHitbox(x + xOffset, y + yOffset, collisionWidth, collisionHeight);
+
+        this.model = new TriggerSpikeModel(hitbox, x, y, targetX, targetY,
+                speed, triggerDistance, sprite, shouldReturn, id);
     }
 
     public int getId() {
-        return id;
+        return model.getId();
     }
 
     public void update() {
-        if (!triggered || reachedTarget) {
+        if (!model.isTriggered() || model.isReachedTarget()) {
             return;
         }
 
-        if (waitingAtTarget) {
-            if (System.currentTimeMillis() - waitStartTime >= waitDurationMs) {
-                waitingAtTarget = false;
-                movingToTarget = false;
+        if (model.isWaitingAtTarget()) {
+            if (System.currentTimeMillis() - model.getWaitStartTime() >= model.getWaitDurationMs()) {
+                model.setWaitingAtTarget(false);
+                model.setMovingToTarget(false);
             }
             return;
         }
 
-        float destX = movingToTarget ? targetX : startX;
-        float destY = movingToTarget ? targetY : startY;
+        float destX = model.isMovingToTarget() ? model.getTargetX() : model.getStartX();
+        float destY = model.isMovingToTarget() ? model.getTargetY() : model.getStartY();
 
         float dx = destX - hitbox.x;
         float dy = destY - hitbox.y;
         float dist = (float) Math.sqrt(dx * dx + dy * dy);
 
+        float speed = model.getSpeed();
         if (dist <= speed) {
             hitbox.x = destX;
             hitbox.y = destY;
 
-            if (movingToTarget && shouldReturn) {
-                waitingAtTarget = true;
-                waitStartTime = System.currentTimeMillis();
+            if (model.isMovingToTarget() && model.isShouldReturn()) {
+                model.setWaitingAtTarget(true);
+                model.setWaitStartTime(System.currentTimeMillis());
             } else {
-                reachedTarget = true;
+                model.setReachedTarget(true);
             }
         } else {
             hitbox.x += (dx / dist) * speed;
@@ -82,8 +65,8 @@ public class TriggerSpike extends Entity {
     }
 
     public void render(Graphics g) {
-        if (sprite != null) {
-            g.drawImage(sprite, (int) hitbox.x, (int) (hitbox.y - hitbox.height),
+        if (model.getSprite() != null) {
+            g.drawImage(model.getSprite(), (int) hitbox.x, (int) (hitbox.y - hitbox.height),
                     (int) hitbox.width, (int) (hitbox.height * 2), null);
         } else {
             g.setColor(java.awt.Color.MAGENTA);
@@ -98,7 +81,7 @@ public class TriggerSpike extends Entity {
         float sy = hitbox.y + hitbox.height / 2;
 
         float dist = (float) Math.sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
-        return dist <= triggerDistance;
+        return dist <= model.getTriggerDistance();
     }
 
     public boolean checkPlayerCollision(Entity player) {
@@ -106,20 +89,19 @@ public class TriggerSpike extends Entity {
     }
 
     public void trigger() {
-        triggered = true;
+        model.setTriggered(true);
     }
 
     public boolean isTriggered() {
-        return triggered;
+        return model.isTriggered();
     }
 
     public void reset() {
-        hitbox.x = startX;
-        hitbox.y = startY;
-        triggered = false;
-        reachedTarget = false;
-        movingToTarget = true;
-        waitingAtTarget = false;
+        hitbox.x = model.getStartX();
+        hitbox.y = model.getStartY();
+        model.setTriggered(false);
+        model.setReachedTarget(false);
+        model.setMovingToTarget(true);
+        model.setWaitingAtTarget(false);
     }
 }
-
