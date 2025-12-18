@@ -50,7 +50,6 @@ public class Player extends Entity {
         controller.resetLevelEnd();
     }
 
-
     public void render(Graphics g) {
         renderer.render(g);
         //drawHitbox(g); // Optional debug rendering
