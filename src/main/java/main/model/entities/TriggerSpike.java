@@ -3,9 +3,7 @@ package main.model.entities;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
 import main.controller.entities.SpikeController;
-import main.model.entities.SpikeModel;
 import main.view.entities.SpikeRenderer;
 
 public class TriggerSpike extends Entity {
