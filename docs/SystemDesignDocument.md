@@ -1,24 +1,24 @@
-# RUST RUNNER [V.0.5]
+# RUST RUNNER
 
 ---
 # System Design Document (SDD)
 
-> This is an small snapshot of the current design of RUST RUNNER, as of the 5th December, 2025.
+> The current design of RUST RUNNER, as of the 19th December 2025.
 > This document is a summarized understanding of
-> the architecture, classes, and how the system interact with itself done by us, ***Group 16***.
+> the architecture, classes, and how the system interact with itself. The code and document was written by us, ***Group 16***.
 
 ---
 ## Developers
-- `Rayan Ahmad`    : `RayanAhmad123`
-- `Philip Hasson`  : `ChangIkJoong`
-- `Nadir Morabeth` : `nadirmorebytes`
-- `Oscar Bergdahl` : `jojk1`
+- `Rayan Ahmad` : `RayanAhmad123`
 - `Jannah Francine Rosales Beato` : `wthjaaa`
+- `Oscar Bergdahl` : `jojk1`
+- `Philip Hasson` : `ChangIkJoong`
+- `Nadir Morabeth` : `nadirmorebytes`
 
 ---
 ## 1. Architectural Overview
 
-The game is meant to be structured around **MVC architecture** with additional
+The game is structured around **MVC architecture** with additional
 patterns. The **MVC** pattern in our architecture consiting of:
 - **Model**
   - `GameModel` : The central **GAME** model for our project, implementing the model for our game.
