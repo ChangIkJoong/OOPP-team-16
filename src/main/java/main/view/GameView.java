@@ -7,27 +7,31 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import main.model.GameModel;
+import main.view.render.LevelRenderer;
 
 public class GameView {
     private final GameModel model;
     private final int gameWidth;
     private final int gameHeight;
 
+    private final LevelRenderer levelRenderer;
+
     public GameView(GameModel model, int gameWidth, int gameHeight) {
         this.model = model;
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
+        this.levelRenderer = new LevelRenderer();
     }
 
     public void renderGame(Graphics g) {
-        //Level
-        model.getLevelManager().draw(g);
-        model.getLevelManager().drawObjectLayer(g);
+        // Level (view-side rendering)
+        levelRenderer.renderBackgroundAndTerrain(g, model.getLevelManager());
+        levelRenderer.renderObjectLayer(g, model.getLevelManager());
 
-        //Player
+        // Player
         model.getPlayer().render(g);
 
-        //Foreground/UI
+        // Foreground/UI
         model.getLevelManager().getCurrentLvl().drawSpawnPlatform(g);
         drawHUD(g);
 

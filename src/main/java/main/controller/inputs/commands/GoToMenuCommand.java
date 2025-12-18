@@ -1,19 +1,17 @@
 package main.controller.inputs.commands;
 
-import main.controller.Game;
-import main.controller.Game.GameState;
+import main.controller.api.IGameActions;
 
 public class GoToMenuCommand implements Command {
 
-    private final Game game;
+    private final IGameActions actions;
 
-    public GoToMenuCommand(Game game) {
-        this.game = game;
+    public GoToMenuCommand(IGameActions actions) {
+        this.actions = actions;
     }
 
     @Override
     public void execute() {
-        game.setGameState(GameState.MENU);
+        actions.goToMenu();
     }
 }
-

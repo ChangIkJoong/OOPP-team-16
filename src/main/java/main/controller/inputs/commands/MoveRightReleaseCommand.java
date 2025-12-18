@@ -1,17 +1,17 @@
 package main.controller.inputs.commands;
 
-import main.controller.Game;
+import main.controller.api.IGameActions;
 
 public class MoveRightReleaseCommand implements Command {
 
-    private final Game game;
+    private final IGameActions actions;
 
-    public MoveRightReleaseCommand(Game game) {
-        this.game = game;
+    public MoveRightReleaseCommand(IGameActions actions) {
+        this.actions = actions;
     }
 
     @Override
     public void execute() {
-        game.getPlayer().setRight(false);
+        actions.moveRightReleased();
     }
 }

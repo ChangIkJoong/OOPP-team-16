@@ -1,18 +1,17 @@
 package main.controller.inputs.commands;
 
-import main.controller.Game;
+import main.controller.api.IGameActions;
 
 public class MoveLeftPressCommand implements Command {
 
-    private final Game game;
+    private final IGameActions actions;
 
-    public MoveLeftPressCommand(Game game) {
-        this.game = game;
+    public MoveLeftPressCommand(IGameActions actions) {
+        this.actions = actions;
     }
 
     @Override
     public void execute() {
-        game.getPlayer().setLeft(true);
+        actions.moveLeftPressed();
     }
 }
-

@@ -1,18 +1,17 @@
 package main.controller.inputs.commands;
 
-import main.controller.Game;
+import main.controller.api.IGameActions;
 
 public class TogglePauseCommand implements Command {
 
-    private final Game game;
+    private final IGameActions actions;
 
-    public TogglePauseCommand(Game game) {
-        this.game = game;
+    public TogglePauseCommand(IGameActions actions) {
+        this.actions = actions;
     }
 
     @Override
     public void execute() {
-        game.togglePause();
+        actions.togglePause();
     }
 }
-

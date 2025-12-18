@@ -1,18 +1,17 @@
 package main.controller.inputs.commands;
 
-import main.controller.Game;
+import main.controller.api.IGameActions;
 
 public class JumpReleaseCommand implements Command {
 
-    private final Game game;
+    private final IGameActions actions;
 
-    public JumpReleaseCommand(Game game) {
-        this.game = game;
+    public JumpReleaseCommand(IGameActions actions) {
+        this.actions = actions;
     }
 
     @Override
     public void execute() {
-        game.getPlayer().setJump(false);
+        actions.jumpReleased();
     }
 }
-

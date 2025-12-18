@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import main.model.levels.LevelManager;
+import main.model.levels.LevelManagerHost;
 import audio.controller.AudioController;
 import main.model.entities.entity.Player;
 import main.model.GameModel;
@@ -21,8 +22,10 @@ import main.view.GamePanel;
 import main.view.GameView;
 import main.view.GameWindow;
 import utilities.LoadSave;
+import main.controller.api.IGameActions;
+import main.controller.api.IGameReadOnly;
 
-public class Game implements Runnable, GameObserver {
+public class Game implements Runnable, GameObserver, IGameActions, IGameReadOnly, LevelManagerHost {
 
     public static final int TILES_DEAFULT_SIZE = 32;
     public static final float SCALE = 1.0f;
@@ -147,6 +150,7 @@ public class Game implements Runnable, GameObserver {
         currentLevel.clearDeathPositions();
     }
 
+    @Override
     public void reloadPlayerCurrentLevel() {
         loadPlayerForCurrentLevel();
     }
@@ -278,5 +282,52 @@ public class Game implements Runnable, GameObserver {
 
     public LevelManager getLevelManager() {
         return model.getLevelManager();
+    }
+
+    // IGameReadOnly
+    @Override
+    public MainMenu getMainMenu() {
+        return mainMenu;
+    }
+
+    @Override
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
+    }
+
+    // IGameActions
+    @Override
+    public void moveLeftPressed() {
+        player.setLeft(true);
+    }
+
+    @Override
+    public void moveLeftReleased() {
+        player.setLeft(false);
+    }
+
+    @Override
+    public void moveRightPressed() {
+        player.setRight(true);
+    }
+
+    @Override
+    public void moveRightReleased() {
+        player.setRight(false);
+    }
+
+    @Override
+    public void jumpPressed() {
+        player.setJump(true);
+    }
+
+    @Override
+    public void jumpReleased() {
+        player.setJump(false);
+    }
+
+    @Override
+    public void goToMenu() {
+        setGameState(GameState.MENU);
     }
 }
