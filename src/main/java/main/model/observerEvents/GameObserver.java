@@ -1,4 +1,8 @@
 package main.model.observerEvents;
+/**
+ * Observer Pattern:
+ * https://refactoring.guru/design-patterns/observer
+ **/
 
 public interface GameObserver {
     void onPlayerDied();

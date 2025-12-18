@@ -32,6 +32,7 @@ public class LoadSave {
 
     // UI Backgrounds
     public static final String MENU_BACKGROUND = "MenuBackground.png";
+    public static final String BACKGROUND = "BackgroundLeaderboards.png";
 
     // UI Buttons
     public static final String BACK_BUTTON_NORMAL = "BackButton.png";

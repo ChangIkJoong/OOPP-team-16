@@ -166,7 +166,7 @@ public class MainMenu {
         }
 
         if (editingName) {
-            g.setFont(new Font("Arial", Font.PLAIN, 18));
+            g.setFont(new Font("Arial", Font.BOLD, 18));
             g.setColor(Color.WHITE);
             String prompt = "Enter name (letters/numbers), ENTER to confirm, ESC to cancel";
             int pw = g.getFontMetrics().stringWidth(prompt);

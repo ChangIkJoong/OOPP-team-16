@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,9 +20,13 @@ public class Leaderboard {
 
     // Track which level's leaderboard is currently shown +1
     private int currentLevelIndex = 0;
+    private BufferedImage backgroundImage;
+
+
 
     public Leaderboard(Game game) {
         this.game = game;
+        loadBackgroundImage();
     }
 
     public void update() {
@@ -108,39 +113,47 @@ public class Leaderboard {
         currentLevelIndex = (currentLevelIndex - 1 + totalLevels) % totalLevels;
     }
 
+    private void loadBackgroundImage() {
+        backgroundImage = LoadSave.getSpriteAtlas(LoadSave.BACKGROUND);
+    }
+
     public void draw(Graphics g) {
-        // background
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+        } else {
+            // Fallback if image not loaded
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+        }
 
         //Current level
         g.setFont(titleFont);
         g.setColor(Color.WHITE);
-        String title = "LEADERBOARD - LEVEL " + (currentLevelIndex + 1);
+        String title = "LEVEL " + (currentLevelIndex + 1);
         FontMetrics font = g.getFontMetrics();
         int calculatedWidth = (Game.GAME_WIDTH - font.stringWidth(title)) / 2;
-        g.drawString(title, calculatedWidth, 100);
+        g.drawString(title, calculatedWidth, 200);
 
         //Left and Right arrows
         g.setFont(headerFont);
-        String leftArrow = "<";
-        String rightArrow = ">";
-        int arrowY = 100;
+        String leftArrow = "<<";
+        String rightArrow = ">>";
+        int arrowY = 200;
         g.drawString(leftArrow, calculatedWidth - 60, arrowY);
         g.drawString(rightArrow, calculatedWidth + font.stringWidth(title) + 40, arrowY);
 
         // headers
-        int startX = 100;
-        int startY = 160;
+        int startX = 300;
+        int startY = 260;
         int headerCalculatedColumnSpaceRank = startX;
         int headerCalculatedColumnSpaceName = startX + 80;
         int headerCalculatedColumnSpaceDeaths = startX + 360;
         int headerCalculatedColumnSpaceTime = startX + 520;
 
-        g.drawString("#", headerCalculatedColumnSpaceRank, startY);
-        g.drawString("Name", headerCalculatedColumnSpaceName, startY);
-        g.drawString("Deaths", headerCalculatedColumnSpaceDeaths, startY);
-        g.drawString("Time (s)", headerCalculatedColumnSpaceTime, startY);
+        g.drawString("RANK", headerCalculatedColumnSpaceRank, startY);
+        g.drawString("NAME", headerCalculatedColumnSpaceName, startY);
+        g.drawString("DEATHS", headerCalculatedColumnSpaceDeaths, startY);
+        g.drawString("TIME (s)", headerCalculatedColumnSpaceTime, startY);
 
         // rows
         g.setFont(rowFont);
@@ -155,7 +168,7 @@ public class Leaderboard {
             rowY += 26;
         }
 
-        g.setFont(new Font("Arial", Font.PLAIN, 16));
-        g.drawString("Use LEFT or RIGHT to change level, ESC to return", 20, Game.GAME_HEIGHT - 30);
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        g.drawString("Use LEFT or RIGHT to change level, ESC to return", 200, Game.GAME_HEIGHT - 170);
     }
 }
