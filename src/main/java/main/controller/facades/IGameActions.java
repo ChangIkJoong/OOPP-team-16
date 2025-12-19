@@ -1,4 +1,4 @@
-package main.controller.api;
+package main.controller.facades;
 
 /**
  * Minimal write-only API for input/commands.

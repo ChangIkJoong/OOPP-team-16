@@ -22,8 +22,8 @@ import main.view.GamePanel;
 import main.view.GameView;
 import main.view.GameWindow;
 import utilities.LoadSave;
-import main.controller.api.IGameActions;
-import main.controller.api.IGameReadOnly;
+import main.controller.facades.IGameActions;
+import main.controller.facades.IGameReadOnly;
 
 public class Game implements Runnable, GameObserver, IGameActions, IGameReadOnly, LevelManagerHost {
 

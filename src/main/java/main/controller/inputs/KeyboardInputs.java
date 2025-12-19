@@ -5,8 +5,8 @@ import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import main.controller.api.IGameActions;
-import main.controller.api.IGameReadOnly;
+import main.controller.facades.IGameActions;
+import main.controller.facades.IGameReadOnly;
 import main.controller.inputs.commands.Command;
 import main.controller.inputs.commands.GoToMenuCommand;
 import main.controller.inputs.commands.JumpPressCommand;

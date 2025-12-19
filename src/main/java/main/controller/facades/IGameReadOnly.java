@@ -1,4 +1,4 @@
-package main.controller.api;
+package main.controller.facades;
 
 import audio.controller.AudioController;
 import main.controller.Game;

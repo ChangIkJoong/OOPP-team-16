@@ -1,6 +1,6 @@
 package main.controller.inputs.commands;
 
-import main.controller.api.IGameActions;
+import main.controller.facades.IGameActions;
 
 public class MoveLeftReleaseCommand implements Command {
 
