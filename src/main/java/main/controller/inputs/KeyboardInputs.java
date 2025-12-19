@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import main.controller.facades.IGameActions;
-import main.controller.facades.IGameReadOnly;
+import main.controller.facades.IGameRead;
 import main.controller.inputs.commands.Command;
 import main.controller.inputs.commands.GoToMenuCommand;
 import main.controller.inputs.commands.JumpPressCommand;
@@ -20,13 +20,13 @@ import main.controller.inputs.commands.TogglePauseCommand;
 public class KeyboardInputs implements KeyListener {
 
     private final IGameActions actions;
-    private final IGameReadOnly game;
+    private final IGameRead game;
     private boolean keyDown = false;
 
     private final Map<Integer, Command> pressedCommands = new HashMap<>();
     private final Map<Integer, Command> releasedCommands = new HashMap<>();
 
-    public KeyboardInputs(IGameActions actions, IGameReadOnly game) {
+    public KeyboardInputs(IGameActions actions, IGameRead game) {
         this.actions = actions;
         this.game = game;
         initCommands();

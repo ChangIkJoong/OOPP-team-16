@@ -23,9 +23,9 @@ import main.view.GameView;
 import main.view.GameWindow;
 import utilities.LoadSave;
 import main.controller.facades.IGameActions;
-import main.controller.facades.IGameReadOnly;
+import main.controller.facades.IGameRead;
 
-public class Game implements Runnable, GameObserver, IGameActions, IGameReadOnly, LevelManagerHost {
+public class Game implements Runnable, GameObserver, IGameActions, IGameRead, LevelManagerHost {
 
     public static final int TILES_DEAFULT_SIZE = 32;
     public static final float SCALE = 1.0f;
@@ -284,7 +284,7 @@ public class Game implements Runnable, GameObserver, IGameActions, IGameReadOnly
         return model.getLevelManager();
     }
 
-    // IGameReadOnly
+    // IGameRead
     @Override
     public MainMenu getMainMenu() {
         return mainMenu;

@@ -5,11 +5,12 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
+import main.controller.facades.IGameRead;
 import main.controller.inputs.KeyboardInputs;
 import main.controller.inputs.MouseInputs;
 import main.controller.Game;
 import main.controller.facades.IGameActions;
-import main.controller.facades.IGameReadOnly;
+
 import static main.controller.Game.GAME_HEIGHT;
 import static main.controller.Game.GAME_WIDTH;
 
@@ -21,7 +22,7 @@ public class GamePanel extends JPanel {
         mouseInputs = new MouseInputs();
         this.game = game;
         setPanelSize();
-        addKeyListener(new KeyboardInputs((IGameActions) game, (IGameReadOnly) game));
+        addKeyListener(new KeyboardInputs((IGameActions) game, (IGameRead) game));
         mouseInputs.setGamePanel(this);
         addMouseListener(mouseInputs);
         addMouseMotionListener(mouseInputs);

@@ -145,15 +145,15 @@ public class Leaderboard {
         // headers
         int startX = 300;
         int startY = 260;
-        int headerCalculatedColumnSpaceRank = startX;
-        int headerCalculatedColumnSpaceName = startX + 80;
-        int headerCalculatedColumnSpaceDeaths = startX + 360;
-        int headerCalculatedColumnSpaceTime = startX + 520;
+        int headerCalculatedColumn = startX;
+        int headerCalculatedColumnName = startX + 150;
+        int headerCalculatedColumnDeaths = startX + 360;
+        int headerCalculatedColumnTime = startX + 520;
 
-        g.drawString("RANK", headerCalculatedColumnSpaceRank, startY);
-        g.drawString("NAME", headerCalculatedColumnSpaceName, startY);
-        g.drawString("DEATHS", headerCalculatedColumnSpaceDeaths, startY);
-        g.drawString("TIME (s)", headerCalculatedColumnSpaceTime, startY);
+        g.drawString("RANK", headerCalculatedColumn, startY);
+        g.drawString("NAME", headerCalculatedColumnName, startY);
+        g.drawString("DEATHS", headerCalculatedColumnDeaths, startY);
+        g.drawString("TIME (s)", headerCalculatedColumnTime, startY);
 
         // rows
         g.setFont(rowFont);
@@ -161,10 +161,10 @@ public class Leaderboard {
         int rowY = startY + 30;
         for (int i = 0; i < entries.size(); i++) {
             Entry e = entries.get(i);
-            g.drawString(String.valueOf(i + 1), headerCalculatedColumnSpaceRank, rowY);
-            g.drawString(e.name, headerCalculatedColumnSpaceName, rowY);
-            g.drawString(String.valueOf(e.deaths), headerCalculatedColumnSpaceDeaths, rowY);
-            g.drawString(String.format("%.2f", e.time), headerCalculatedColumnSpaceTime, rowY);
+            g.drawString(String.valueOf(i + 1), headerCalculatedColumn, rowY);
+            g.drawString(e.name, headerCalculatedColumnName, rowY);
+            g.drawString(String.valueOf(e.deaths), headerCalculatedColumnDeaths, rowY);
+            g.drawString(String.format("%.2f", e.time), headerCalculatedColumnTime, rowY);
             rowY += 26;
         }
 

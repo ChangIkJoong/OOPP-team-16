@@ -5,7 +5,7 @@ import main.controller.Game;
 import main.view.states.Leaderboard;
 import main.view.states.MainMenu;
 
-public interface IGameReadOnly {
+public interface IGameRead {
     Game.GameState getGameState();
 
     MainMenu getMainMenu();

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SystemDesignDocument.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="rust-runner--system-design-document-sdd">RUST RUNNER — System Design Document (SDD)</h1>
+<p><strong>Project:</strong> RUST RUNNER (desktop 2D platformer)<br>
+<strong>Tech:</strong> Java 17, Swing (UI), JavaFX Media (audio), Maven (build)</p>
+<p><code>Rust Runner is a 2D Platform game, inspired by similiar games in the same category, developed for the Object Oriented Programming Project course.</code></p>
+<hr>
+<h2 id="developers-group-16">Developers (Group 16)</h2>
+<ul>
+<li>Rayan Ahmad : <code>RayanAhmad123</code></li>
+<li>Philip Hasson : <code>ChangIkJoong</code></li>
+<li>Nadir Morabeth : <code>nadirmorebytes</code></li>
+<li>Oscar Bergdahl : <code>jojk1</code></li>
+<li>Jannah Francine Rosales Beato :<code>wthjaaa</code></li>
+</ul>
+<hr>
+<h2 id="1-purpose--scope">1. Purpose &amp; Scope</h2>
+<p>This document describes the high-level architecture and key design decisions of <strong>RUST RUNNER</strong>:</p>
+<ul>
+<li>How the game is structured (MVC + Design patterns)</li>
+<li>How the main loop, rendering, input, audio, levels, and persistence interact</li>
+<li>Where to extend the system (new levels, entities, UI states, commands)</li>
+</ul>
+<hr>
+<h2 id="2-system-context">2. System Context</h2>
+<p>RUST RUNNER is a desktop game built in Java:</p>
+<ul>
+<li><strong>Inputs:</strong> keyboard + mouse (Swing listeners)</li>
+<li><strong>Outputs:</strong> rendered frames (Swing <code>JPanel</code>) + audio (JavaFX Media)</li>
+<li><strong>Persistence:</strong> local leaderboard file stored under <code>src/main/resources/leaderboard.txt</code></li>
+</ul>
+<hr>
+<h2 id="3-architectural-overview">3. Architectural Overview</h2>
+<p>The architecture is primarily:</p>
+<ul>
+<li><strong>MVC</strong> for gameplay: <code>GameModel</code> + <code>Game</code> (controller) + <code>GameView</code></li>
+<li><strong>State</strong>s for the application screens (menu/playing/leaderboard/level-select)</li>
+<li><strong>Command pattern</strong> for keyboard input mapping</li>
+<li><strong>Singleton</strong> for audio management (<code>AudioController</code>)</li>
+<li><strong>Entity</strong> pattern for the different entities to be used in the Game Model</li>
+<li><strong>Facade</strong> pattern as a communicator between components (<code>IGameRead</code>, <code>IGameActions</code>)</li>
+<li><strong>Observer</strong> pattern for events in the Game (<code>GameObserver</code>)</li>
+</ul>
+<hr>
+<h2 id="4-module-structure">4. Module Structure</h2>
+<h3 id="41-entry-point">4.1 Entry point</h3>
+<ul>
+<li><code>application.MainClass</code>
+<ul>
+<li>Instantiates the game controller (<code>new Game()</code>).</li>
+</ul>
+</li>
+</ul>
+<h3 id="42-controller-layer">4.2 Controller layer</h3>
+<ul>
+<li><code>main.controller.*</code>
+<ul>
+<li><code>Game</code>: application lifecycle owner (creates subsystems, owns loop, switches states).</li>
+<li><code>Game</code> : also handles gameplay update logic (delegates to <code>Player</code> + <code>LevelManager</code>, manages transitions).</li>
+<li><code>main.controller.inputs.*</code>: keyboard/mouse handling.</li>
+<li><code>main.controller.inputs.commands.*</code>: command objects used by keyboard mapping.</li>
+</ul>
+</li>
+</ul>
+<h3 id="43-model-layer">4.3 Model layer</h3>
+<ul>
+<li><code>main.model.*</code>
+<ul>
+<li><code>GameModel</code>: gameplay state container (pause/transition/stats).</li>
+<li><code>main.model.Levels.*</code>: <code>LevelManager</code>, <code>Level</code>, <code>LevelConfigLoader</code>.</li>
+<li><code>main.model.entities.*</code>: entity models (player/platform/spikes/etc.).</li>
+</ul>
+</li>
+</ul>
+<h3 id="44-view-layer">4.4 View layer</h3>
+<ul>
+<li><code>main.view.*</code>
+<ul>
+<li><code>GamePanel</code>: Swing <code>JPanel</code>, attaches listeners, calls <code>game.render(g)</code> in <code>paintComponent</code>.</li>
+<li><code>GameWindow</code>: Swing <code>JFrame</code> wrapper.</li>
+<li><code>GameView</code>: rendering of the world + HUD + transition overlay.</li>
+<li><code>main.view.states.*</code>: menu/level-select/leaderboard view implementations.</li>
+<li><code>main.view.interfaces.*</code>: state wrappers (<code>GameBaseState</code>, <code>MenuState</code>, <code>GamingState</code>, etc.).</li>
+</ul>
+</li>
+</ul>
+<h3 id="45-utilities">4.5 Utilities</h3>
+<ul>
+<li><code>utilities.*</code>
+<ul>
+<li><code>LoadSave</code>: resource loading (images / levels / leaderboard file I/O).</li>
+<li><code>HelpMethods</code>: collision helpers and tile checks.</li>
+</ul>
+</li>
+</ul>
+<h3 id="46-audio">4.6 Audio</h3>
+<ul>
+<li><code>audio.controller.AudioController</code>
+<ul>
+<li>JavaFX bootstrapping + MediaPlayer/AudioClip management.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="5-uml-diagrams">5. UML Diagrams</h2>
+<p><img src="mvc.png" alt="mvc.png">
+This UML shows the overview MVC split used in the project.
+Game owns both the model and view, runs the game loop, and decides which screen state is active.</p>
+<ul>
+<li><code>Game</code> acts as the Controller. it creates the model and view, owns the game loop thread, and selects which screen state is active.</li>
+<li><code>GameModel</code> is the Model. it updates player and level logic, manages this, and raises gameplay events.</li>
+<li><code>GameView</code> (with <code>GamePanel</code>) was developed as the View, it renders by reading model state, while Swing controls the actual paint timing.
+Communication back from model to controller has been initiated to do via GameObserver callbacks (Observer pattern).</li>
+</ul>
+<p><img src="Model.png" alt="Model.png">
+This UML is displaying internal structure of the Model layer.
+<code>GameModel</code> is the top-level <code>Model</code>, it owns the Player and LevelManager, and coordinates update flow, pause, transition state, timing, and scorings.
+<code>LevelManager</code> in turn also owns the current Level and handles level progression and updating level entities,<code>Level</code> contains level-specific data such as tile grids and collections of in-level entities (platform/spike/trigger objects). <code>GameObserver</code> is the outward-facing model event interface used to report domain events (death/respawn/completion/transition hooks).</p>
+<p><img src="View.png" alt="View.png">
+This UML shows how rendering and screen/UI composition is structured:
+<code>GamePanel</code> is the Swing JPanel and the paint entry point, it calls back into <code>Game</code> and it's <code>render(Graphics)</code> from <code>paintComponent</code>,<code>GameView</code> is all about gameplay rendering, reading model state and delegating level-layer drawing to <code>LevelRenderer</code>.
+<code>GameBaseState</code> and its concrete derivatives and <code>MenuState, GamingState, LeaderboardState, LevelSelectState</code> provides the different states that Game can switch inbetween.
+Screen implementations (<code>MainMenu, Leaderboard, LevelSelect</code>) encapsulate drawing and UI behavior for their respective screens.</p>
+<p><img src="ControllerCommands.png" alt="ControllerCommands.png">
+This UML is visualizing the input pipeline using the Command pattern, and in turn also the <code>Controller</code>.
+Keyboard events are received by <code>KeyboardInputs</code>, which in turn maps key presses/releases to Command objects (for example to move left press/release, jump press/release).
+Each Command calls IGameActions (implemented by <code>Game</code>) to mutate gameplay state (mostly by setting booleans on Player or toggling pause / changing state).
+IGameRead is used by inputs for “read/utility” access such as current GameState, menu name-editing state, leaderboard navigation, and audio playback.
+(IGameRead is IGameReadOnly due to faulty commits and pulls by our team last-minute).</p>
+<p><img src="interfaces.png" alt="interfaces.png"></p>
+<p>This UML shows the abstractions used to reduce coupling between major components, as well as our entity based relationship for the models of the
+created in-game entities.
+IGameActions and IGameRead act as thin Facades interfaces around Game, so input handlers and commands don’t depend fully on
+the controller class. GameObserver is the observer interface that allows the model (GameModel) to act with events without
+knowing about UI/audio.
+GameBaseState provides a shared interface for “screen states” so
+the controller can swap between menu/play/leaderboard/level-select without embedding screen logic into Game.</p>
+<p>For the Entity pattern, we currently chose to actually still have the rendering of each component within each entity class.
+This was for our own sanity and modularisation, there was less to be redone in View later on in-case we would add more entities,
+and as a group of 5 people, switching between different codebases, modules or classes makes it even more confusing.</p>
+<hr>
+<h2 id="6-runtime-overview">6. Runtime Overview</h2>
+<h3 id="61-startup">6.1 Startup</h3>
+<ol>
+<li><code>MainClass.main()</code> creates <code>new Game()</code>.</li>
+<li><code>Game</code> initializes:
+<ul>
+<li><code>AudioController</code> (singleton)</li>
+<li><code>LevelManager</code> + <code>Player</code></li>
+<li><code>GameModel</code> + <code>Game</code> + <code>GameView</code></li>
+<li>UI: <code>GamePanel</code> + <code>GameWindow</code></li>
+</ul>
+</li>
+<li><code>Game</code> starts the game loop thread (<code>implements Runnable</code>).</li>
+</ol>
+<h3 id="62-main-loop-update--render">6.2 Main Loop (Update + Render)</h3>
+<p>The loop uses a fixed time-step approach:</p>
+<ul>
+<li><strong>UPS</strong>: logic updates per second</li>
+<li><strong>FPS</strong>: renders per second (via <code>JPanel.repaint()</code>)</li>
+</ul>
+<p>Conceptual flow:</p>
+<ul>
+<li>Update tick:
+<ul>
+<li>If in transition -&gt; update transition scale + load next level at peak scale.</li>
+<li>Else -&gt; delegate update to the currently active screen state.</li>
+</ul>
+</li>
+<li>Render tick:
+<ul>
+<li><code>GamePanel.paintComponent()</code> -&gt; calls <code>game.render(g)</code></li>
+<li>State renders the correct view (menu, level select, leaderboard, or gameplay)</li>
+<li>Transition overlay is drawn on top (if active)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="7-states">7. States</h2>
+<p>The application uses a <strong>state</strong> pattern to swap whole-screen behavior without mixing UI logic:</p>
+<ul>
+<li>Menu (<code>MenuState</code>) -&gt; <code>MainMenu.draw/update</code></li>
+<li>Playing (<code>GamingState</code>) -&gt; <code>GameView.renderGame</code> + gameplay loop</li>
+<li>Level Select (<code>LevelSelectState</code>) -&gt; <code>LevelSelect.draw/update</code></li>
+<li>Leaderboard (<code>LeaderboardState</code>) -&gt; <code>Leaderboard.draw/update</code></li>
+</ul>
+<hr>
+<h2 id="8-input-handling">8. Input Handling</h2>
+<p>Keyboard input uses the <strong>Command pattern</strong>:</p>
+<ul>
+<li><code>KeyboardInputs</code> maps key press/release events to <code>Command</code> objects.</li>
+<li>Each <code>Command.execute()</code> performs one action (move/jump/pause/go-to-menu).</li>
+</ul>
+<p>Mouse input is routed by current state (menu and level-select buttons):</p>
+<ul>
+<li><code>MouseInputs</code> reads <code>game.getGameState()</code> and calls <code>mainMenu.*</code> or <code>levelSelect.*</code> handlers.</li>
+</ul>
+<hr>
+<h2 id="9-level-system--data">9. Level System &amp; Data</h2>
+<h3 id="91-level-assets">9.1 Level assets</h3>
+<p>Levels are defined using:</p>
+<ul>
+<li><strong>PNG maps</strong> in <code>src/main/resources/</code>:
+<ul>
+<li>Tile layer (red channel)</li>
+<li>Obstacle layer (green channel)</li>
+<li>Object layer (blue channel)</li>
+</ul>
+</li>
+<li><strong>Text config</strong> (<code>level1.txt</code> … <code>level7.txt</code>) loaded via <code>LevelConfigLoader</code>:
+<ul>
+<li>Player spawn</li>
+<li>Spawn platform config</li>
+<li>Trigger platforms and spikes</li>
+</ul>
+</li>
+</ul>
+<h3 id="92-levelmanager-responsibilities">9.2 LevelManager responsibilities</h3>
+<p><code>LevelManager</code>:</p>
+<ul>
+<li>Builds all levels at startup</li>
+<li>Tracks <code>currentLevelIndex</code></li>
+<li>Tracks <code>completedLevels</code> to implement level unlocking</li>
+<li>Draws layers and level entities (tiles, objects, platforms, spikes, death sprites)</li>
+</ul>
+<hr>
+<h2 id="10-rendering">10. Rendering</h2>
+<p>Rendering is done using Java2D (<code>java.awt.Graphics</code>) on Swing components:</p>
+<ul>
+<li><code>GamePanel</code> is the main drawing surface.</li>
+<li><code>GameView</code> is responsible for:
+<ul>
+<li>background + tile layers + objects</li>
+<li>player rendering</li>
+<li>HUD and pause overlay</li>
+<li>transition effect overlay (scaled image centered on the player)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="11-audio">11. Audio</h2>
+<p>Audio is centralized in <code>AudioController</code> (Singleton):</p>
+<ul>
+<li>Initializes JavaFX runtime once (<code>Platform.startup</code>)</li>
+<li>Uses:
+<ul>
+<li><code>MediaPlayer</code> for looping background music (menu vs gameplay)</li>
+<li><code>AudioClip</code> for sound effects (jump, death, respawn, next level, platform)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="12-leaderboard-scoring-and-game-logic">12. Leaderboard Scoring and Game Logic</h2>
+<p>Leaderboard entries are stored as lines:</p>
+<p><code>name;levelNumber;deaths;timeSeconds</code></p>
+<p>Where:</p>
+<ul>
+<li><code>levelNumber</code> is 1-based</li>
+<li><code>timeSeconds</code> uses a dot decimal separator on write, and accepts comma/dot on read</li>
+</ul>
+<p>Implementation details:</p>
+<ul>
+<li>Writing: <code>LoadSave.appendToScoreFile(...)</code> (append-only)</li>
+<li>Reading: <code>LoadSave.readScoreFile()</code></li>
+<li>Display: <code>Leaderboard</code> filters per level, sorts by <strong>fewest deaths</strong> then <strong>lowest time</strong>, and shows <strong>top 5</strong></li>
+</ul>
+<hr>
+<h2 id="13-how-to-expand">13. How to expand</h2>
+<h3 id="131-adding-a-new-level">13.1 Adding a new level</h3>
+<ul>
+<li>Add new PNG maps to <code>src/main/resources/</code> (tile/obstacle/object)</li>
+<li>Add a <code>levelN.txt</code> config file (spawn/platform/spike configs)</li>
+<li>Extend <code>LevelManager.buildAllLevels()</code> to include the new level</li>
+</ul>
+<h3 id="132-adding-a-new-screenstate">13.2 Adding a new screen/state</h3>
+<ul>
+<li>Implement a view in <code>main.view.states.*</code></li>
+<li>Create a state wrapper in <code>main.view.interfaces.*</code> (extend <code>GameBaseState</code>)</li>
+<li>Add a new <code>GameState</code> enum value and transition logic in <code>Game</code></li>
+</ul>
+<h3 id="133-adding-a-new-key-binding">13.3 Adding a new key binding</h3>
+<ul>
+<li>Implement a new <code>Command</code> in <code>main.controller.inputs.commands.*</code></li>
+<li>Register it in <code>KeyboardInputs.initCommands()</code></li>
+</ul>
+
+</body>
+</html>
